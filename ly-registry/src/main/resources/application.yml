@@ -1,0 +1,21 @@
+server:
+  port: 10086
+
+spring:
+  application:
+    name: eureka-server
+
+eureka:
+  client:
+    service-url: # EurekaServer的地址,现在是自己的地址,如果是集群,需要加上其它Server的地址。
+      defaultZone: http://127.0.0.1:10086/eureka
+    register-with-eureka: true #default is true
+    fetch-registry: true #default is true
+  instance:
+    # 当调用getHostname获取实例的hostname时,返回ip而不是host名称
+    # 将自己的ip注册到Eureka Server上   如果不配置该属性  则默认为false且表示注册微服务所在操作系统的hostname到Eureka Server
+    prefer-ip-address: true
+    #ip-address: 127.0.0.1 # 指定自己的ip信息,不指定的话会自己寻找
+  server:
+    eviction-interval-timer-in-ms: 30000 #default is 60000 失效剔除
+    enable-self-preservation: true #default is true 自我保护模式
