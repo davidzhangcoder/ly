@@ -6,8 +6,8 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
 @EnableDiscoveryClient
 @SpringBootApplication
-public class LyItemApplication {
+public class LyItem {
     public static void main(String[] args) {
-        SpringApplication.run( LyItemApplication.class );
+        SpringApplication.run( LyItem.class );
     }
 }

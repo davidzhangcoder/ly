@@ -16,6 +16,19 @@ eureka:
 
 zuul:
   prefix: /api # 添加路由前缀 retryable: true
+  routes:
+    item-service:
+      path: /item-service/**
+      url: http://127.0.0.1:8081
+
+#zuul:
+#  prefix: /api # 添加路由前缀 retryable: true
+#  routes:
+#    item-service: # 这里是路由id,随意写
+#      path: /item/** # 这里是映射路径
+##      serviceId: item-service # 指定服务名称
+#      url: http://127.0.0.1:8081／ # 映射路径对应的实际url地址
+
 
 ribbon:
   ConnectTimeout: 250 # 连接超时时间(ms)
