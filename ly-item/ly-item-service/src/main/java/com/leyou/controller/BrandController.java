@@ -1,14 +1,11 @@
 package com.leyou.controller;
 
+import com.leyou.common.vo.PageResult;
 import com.leyou.domain.Brand;
 import com.leyou.service.BrandService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @RequestMapping("/brand")
 @RestController
@@ -18,14 +15,19 @@ public class BrandController {
     private BrandService brandService;
 
     @GetMapping("getBrands")
-    public List<Brand> getBrands(
+    public ResponseEntity<PageResult<Brand>> getBrands(
             @RequestParam( name = "key" , required = true ) String key,
             @RequestParam( name = "descending" , required = true ) boolean descending,
             @RequestParam( name = "page" , required = true ) int page,
             @RequestParam( name = "rowsPerPage" , required = true ) int rowsPerPage,
             @RequestParam( name = "sortBy" , required = true ) String sortBy
     ) {
-        return brandService.searchBrand(key, descending, page, rowsPerPage, sortBy);
+        return ResponseEntity.ok(brandService.searchBrand(key, descending, page, rowsPerPage, sortBy));
+    }
+
+    @RequestMapping(value = "persistBrand" , method = { RequestMethod.POST } )
+    public ResponseEntity<Brand> persistBrand(@RequestBody Brand brand) {
+        return ResponseEntity.ok( brandService.persistBrand(brand) );
     }
 
 }

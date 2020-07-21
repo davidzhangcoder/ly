@@ -1,34 +1,43 @@
 package com.leyou.service.impl;
 
+import com.leyou.common.vo.PageResult;
 import com.leyou.dao.BrandDao;
+import com.leyou.dao.CategoryDao;
 import com.leyou.domain.Brand;
+import com.leyou.domain.Category;
 import com.leyou.service.BrandService;
 import org.apache.commons.lang.StringUtils;
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service( value = "BrandServiceImpl" )
 @Transactional
 public class BrandServiceImpl implements BrandService {
 
     @Autowired
-    BrandDao brandDao;
+    private BrandDao brandDao;
+
+    @Autowired
+    private CategoryDao categoryDao;
 
     @Override
-    public List<Brand> searchBrand(String key, boolean descending, int page, int rowsPerPage, String sortBy) {
+    public PageResult<Brand> searchBrand(String key, boolean descending, int page, int rowsPerPage, String sortBy) {
 
         page--;
         page = page < 0 ? 0 : page;//page 为页码，数据库从0页开始
@@ -51,7 +60,7 @@ public class BrandServiceImpl implements BrandService {
                 List<Predicate> predicateList = new ArrayList<Predicate>();
                 //条件1：查询 tvName 为 海信 的数据，root.get 中的值与 TV 实体中的属性名称对应
                 if (!StringUtils.isBlank(key)) {
-                    predicateList.add(cb.equal(root.get("name").as(String.class), key));
+                    predicateList.add( cb.like( root.get("name").as(String.class), "%"+key+"%" ) );
                 }
 
                 //条件2：TV 生产日期（dateOfProduction）大于等于 start 的数据，root.get 中的 dateOfProduction 必须对应 TV 中的属性
@@ -65,6 +74,39 @@ public class BrandServiceImpl implements BrandService {
                 return query.where(pre).getRestriction();
             }
         };
-        return brandDao.findAll(specification);//没有数据时，返回空列表
+
+        Page<Brand> brandPage = brandDao.findAll(specification , pageable);//没有数据时，返回空列表
+
+//        if(CollectionUtils.isEmpty(brandPage.getContent())) {
+//            throw new LyException(ExceptionEnum.BRAND_SEARCH_LIST_IS_EMPTY);
+//        }
+
+        PageResult<Brand> pageResult = new PageResult(brandPage.getTotalElements(), (long)brandPage.getTotalPages(), brandPage.getContent());
+
+        return pageResult;
+    }
+
+    public Brand persistBrand(Brand brand) {
+        if( brand.getId() > 0 ) {
+            Brand existingBrand = brandDao.getOne( brand.getId() );
+
+            if( !CollectionUtils.isEmpty(existingBrand.getCategories()) ) {
+                //TODO: delete Category-Brand
+            }
+        }
+
+        if( !CollectionUtils.isEmpty( brand.getCategories() ) ) {
+            List<Long> ids = brand.getCategories().stream().map(a -> a.getId()).collect(Collectors.toList());
+            brand.getCategories().clear();
+            for( Long id : ids ) {
+                Category retrievedCategory = categoryDao.findById(id).get();
+                if( retrievedCategory != null )
+                    brand.getCategories().add( retrievedCategory );
+            }
+        }
+
+        brand = brandDao.save(brand);
+        //Hibernate.initialize(brand.getCategorySet());
+        return brand;
     }
 }

@@ -4,7 +4,8 @@ import org.springframework.http.HttpStatus;
 
 public enum ExceptionEnum {
 
-    NAME_IS_NULL(HttpStatus.BAD_REQUEST.value(),"姓名不能为空")
+    NAME_IS_NULL(HttpStatus.BAD_REQUEST.value(),"姓名不能为空"),
+    BRAND_SEARCH_LIST_IS_EMPTY(HttpStatus.NOT_FOUND.value(),"品牌搜索结果为空")
     ;
 
     private ExceptionEnum(int code, String message) {
