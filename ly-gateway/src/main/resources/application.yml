@@ -19,8 +19,12 @@ zuul:
   routes:
     item-service:
       path: /item-service/**
-      url: http://127.0.0.1:8081
-
+      #url: http://127.0.0.1:8081
+      serviceId: item-service
+    upload-service:
+      path: /upload/**
+      serviceId: upload-service #eureka中的微服务serviceId
+      strip-prefix: false
 #zuul:
 #  prefix: /api # 添加路由前缀 retryable: true
 #  routes:

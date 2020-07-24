@@ -89,24 +89,38 @@ public class BrandServiceImpl implements BrandService {
     public Brand persistBrand(Brand brand) {
         if( brand.getId() > 0 ) {
             Brand existingBrand = brandDao.getOne( brand.getId() );
+            existingBrand.setName( brand.getName() );
+            existingBrand.setLetter( brand.getLetter() );
+            existingBrand.setImage( brand.getImage() );
 
             if( !CollectionUtils.isEmpty(existingBrand.getCategories()) ) {
-                //TODO: delete Category-Brand
+                existingBrand.getCategories().clear();
             }
-        }
 
-        if( !CollectionUtils.isEmpty( brand.getCategories() ) ) {
+            updateBrandCategory(brand, existingBrand);
+
+            existingBrand = brandDao.save( existingBrand );
+            return existingBrand;
+        }
+        else {
+
+            updateBrandCategory(brand, brand);
+
+            brand = brandDao.save(brand);
+            //Hibernate.initialize(brand);
+            return brand;
+        }
+    }
+
+    private void updateBrandCategory(Brand brand, Brand targetBrand) {
+        if (!CollectionUtils.isEmpty(brand.getCategories())) {
             List<Long> ids = brand.getCategories().stream().map(a -> a.getId()).collect(Collectors.toList());
-            brand.getCategories().clear();
-            for( Long id : ids ) {
+            targetBrand.getCategories().clear();
+            for (Long id : ids) {
                 Category retrievedCategory = categoryDao.findById(id).get();
-                if( retrievedCategory != null )
-                    brand.getCategories().add( retrievedCategory );
+                if (retrievedCategory != null)
+                    targetBrand.getCategories().add(retrievedCategory);
             }
         }
-
-        brand = brandDao.save(brand);
-        //Hibernate.initialize(brand.getCategorySet());
-        return brand;
     }
 }
