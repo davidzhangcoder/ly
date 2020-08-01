@@ -9,4 +9,6 @@ public interface BrandService {
 
     public Brand persistBrand(Brand brand);
 
+    public void deleteBrand(long brandId);
+
 }

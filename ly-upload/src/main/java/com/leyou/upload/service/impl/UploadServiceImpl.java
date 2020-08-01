@@ -2,6 +2,7 @@ package com.leyou.upload.service.impl;
 
 import com.github.tobato.fastdfs.domain.StorePath;
 import com.github.tobato.fastdfs.service.FastFileStorageClient;
+import com.leyou.upload.config.UploadConfiguration;
 import com.leyou.upload.service.UploadService;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -21,6 +22,9 @@ public class UploadServiceImpl implements UploadService {
 
     private static final Logger logger = LoggerFactory.getLogger(UploadServiceImpl.class);
 
+    @Autowired
+    private UploadConfiguration uploadConfiguration;
+
     // 支持的文件类型
     private static final List<String> suffixes = Arrays.asList("image/png", "image/jpeg", "image/jpg");
     @Autowired
@@ -33,7 +37,7 @@ public class UploadServiceImpl implements UploadService {
             // 1、图片信息校验
             // 1)校验文件类型
             String type = file.getContentType();
-            if (!suffixes.contains(type)) {
+            if (!uploadConfiguration.getAllowedSuffixes().contains(type)) {
                 logger.info("上传失败,文件类型不匹配:{}", type);
                 return null;
             }
@@ -49,7 +53,7 @@ public class UploadServiceImpl implements UploadService {
             StorePath storePath = this.storageClient.uploadFile(
                     file.getInputStream(), file.getSize(), extension, null);
             // 2.3、返回完整路径
-            return "http://image.leyou.com/" + storePath.getFullPath();
+            return uploadConfiguration.getBaseUrl() + storePath.getFullPath();
         } catch (Exception e) {
             return null;
         }

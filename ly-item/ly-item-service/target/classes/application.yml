@@ -6,7 +6,7 @@ spring:
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
     driver-class-name: com.mysql.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/leyou
+    url: jdbc:mysql://localhost:3306/leyou1
     username: root
     password: ""
 #    hikari:

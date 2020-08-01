@@ -86,6 +86,7 @@ public class BrandServiceImpl implements BrandService {
         return pageResult;
     }
 
+    @Override
     public Brand persistBrand(Brand brand) {
         if( brand.getId() > 0 ) {
             Brand existingBrand = brandDao.getOne( brand.getId() );
@@ -110,6 +111,11 @@ public class BrandServiceImpl implements BrandService {
             //Hibernate.initialize(brand);
             return brand;
         }
+    }
+
+    @Override
+    public void deleteBrand(long brandId) {
+        brandDao.deleteById(brandId);
     }
 
     private void updateBrandCategory(Brand brand, Brand targetBrand) {

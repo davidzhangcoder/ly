@@ -4,6 +4,7 @@ import com.leyou.common.vo.PageResult;
 import com.leyou.domain.Brand;
 import com.leyou.service.BrandService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,6 +14,11 @@ public class BrandController {
 
     @Autowired
     private BrandService brandService;
+
+    @GetMapping("testHttpStatus")
+    public ResponseEntity<String> testHttpStatus() {
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
 
     @GetMapping("getBrands")
     public ResponseEntity<PageResult<Brand>> getBrands(
@@ -28,6 +34,12 @@ public class BrandController {
     @RequestMapping(value = "persistBrand" , method = { RequestMethod.POST } )
     public ResponseEntity<Brand> persistBrand(@RequestBody Brand brand) {
         return ResponseEntity.ok( brandService.persistBrand(brand) );
+    }
+
+    @RequestMapping(value = "deleteBrand/{brandId}" , method = { RequestMethod.DELETE } )
+    public ResponseEntity<Void> deleteBrand(@PathVariable long brandId) {
+        brandService.deleteBrand(brandId);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
 }
