@@ -42,4 +42,13 @@ public class BrandController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
+    @RequestMapping(value = "{brandId}" , method = { RequestMethod.GET } )
+    public ResponseEntity<String> getBrandNameById(@PathVariable long brandId) {
+        Brand brand = brandService.getBrandById( brandId );
+        String brandName = "";
+        if( brand != null )
+            brandName = brand.getName();
+        return ResponseEntity.ok( brandName );
+    }
+
 }

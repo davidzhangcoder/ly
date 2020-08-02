@@ -20,6 +20,9 @@ public class SpecParam implements Serializable {
     @JoinColumn(name="cid",referencedColumnName="id")
     private Category category;
 
+    @Column(name = "cid", insertable = false , updatable = false)
+    private long cid;
+
     @Column(name = "group_id")
     private long specGroupID;
 
@@ -60,6 +63,14 @@ public class SpecParam implements Serializable {
 
     public void setCategory(Category category) {
         this.category = category;
+    }
+
+    public long getCid() {
+        return cid;
+    }
+
+    public void setCid(long cid) {
+        this.cid = cid;
     }
 
     public long getSpecGroupID() {

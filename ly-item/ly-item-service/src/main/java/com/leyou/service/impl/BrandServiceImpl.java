@@ -7,7 +7,6 @@ import com.leyou.domain.Brand;
 import com.leyou.domain.Category;
 import com.leyou.service.BrandService;
 import org.apache.commons.lang.StringUtils;
-import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -116,6 +115,12 @@ public class BrandServiceImpl implements BrandService {
     @Override
     public void deleteBrand(long brandId) {
         brandDao.deleteById(brandId);
+    }
+
+    @Override
+    public Brand getBrandById(long brandId) {
+        Brand brand = brandDao.findById(brandId).orElse(null);
+        return brand;
     }
 
     private void updateBrandCategory(Brand brand, Brand targetBrand) {

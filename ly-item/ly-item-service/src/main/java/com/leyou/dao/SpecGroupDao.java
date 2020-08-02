@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface SpecificationDao extends JpaRepository<SpecGroup,Long>, JpaSpecificationExecutor<SpecGroup> {
+public interface SpecGroupDao extends JpaRepository<SpecGroup,Long>, JpaSpecificationExecutor<SpecGroup> {
 
     public List<SpecGroup> findByCategory_Id(long cid);
 }

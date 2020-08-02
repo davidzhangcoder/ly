@@ -1,5 +1,7 @@
 package com.leyou.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -11,6 +13,7 @@ import static javax.persistence.GenerationType.IDENTITY;
 
 @Entity
 @Table(name="tb_brand")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Brand implements Serializable {
 
     @Id
