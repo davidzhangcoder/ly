@@ -123,6 +123,12 @@ public class BrandServiceImpl implements BrandService {
         return brand;
     }
 
+    @Override
+    public List<Brand> getBrandsByIds(List<Long> ids) {
+        List<Brand> brandsList = brandDao.findAllById(ids);
+        return brandsList;
+    }
+
     private void updateBrandCategory(Brand brand, Brand targetBrand) {
         if (!CollectionUtils.isEmpty(brand.getCategories())) {
             List<Long> ids = brand.getCategories().stream().map(a -> a.getId()).collect(Collectors.toList());

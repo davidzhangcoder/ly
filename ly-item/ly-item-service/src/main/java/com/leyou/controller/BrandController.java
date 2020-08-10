@@ -8,6 +8,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RequestMapping("/brand")
 @RestController
 public class BrandController {
@@ -49,6 +51,12 @@ public class BrandController {
         if( brand != null )
             brandName = brand.getName();
         return ResponseEntity.ok( brandName );
+    }
+
+    @RequestMapping(value = "getBrandsByIds" , method = { RequestMethod.GET } )
+    public ResponseEntity<List<Brand>> getBrandsByIds( @RequestParam( name = "ids" , required = true ) List<Long> ids ){
+        List<Brand> brandsByIds = brandService.getBrandsByIds(ids);
+        return ResponseEntity.ok( brandsByIds );
     }
 
 }

@@ -2,23 +2,45 @@ package com.leyou.search.service.impl;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.leyou.domain.Sku;
-import com.leyou.domain.SpecParam;
-import com.leyou.domain.Spu;
-import com.leyou.domain.SpuDetail;
+import com.leyou.common.vo.PageResult;
+import com.leyou.domain.*;
+import com.leyou.search.client.BrandClient;
 import com.leyou.search.client.CategoryClient;
 import com.leyou.search.client.GoodsClient;
 import com.leyou.search.client.SpecificationClient;
 import com.leyou.search.pojo.Goods;
+import com.leyou.search.repository.GoodsRepository;
 import com.leyou.search.service.SearchService;
+import com.leyou.search.vo.SearchRequest;
+import com.leyou.search.vo.SearchResult;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
+import org.elasticsearch.index.query.MatchQueryBuilder;
+import org.elasticsearch.index.query.Operator;
+import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.aggregations.Aggregation;
+import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.bucket.terms.LongTerms;
+import org.elasticsearch.search.aggregations.bucket.terms.StringTerms;
+import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.terms.UnmappedTerms;
+import org.elasticsearch.search.sort.ScoreSortBuilder;
+import org.elasticsearch.search.sort.SortBuilders;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.elasticsearch.core.ElasticsearchTemplate;
+import org.springframework.data.elasticsearch.core.aggregation.AggregatedPage;
+import org.springframework.data.elasticsearch.core.query.FetchSourceFilter;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service( value = "SearchServiceImpl" )
 @Transactional
@@ -32,6 +54,16 @@ public class SearchServiceImpl implements SearchService {
 
     @Autowired
     private SpecificationClient specificationClient;
+
+    @Autowired
+    private BrandClient brandClient;
+
+    @Autowired
+    private GoodsRepository goodsRepository;
+
+    @Autowired
+    private ElasticsearchTemplate elasticsearchTemplate;
+
 
     private ObjectMapper mapper = new ObjectMapper();
 
@@ -101,6 +133,118 @@ public class SearchServiceImpl implements SearchService {
         goods.setSkus(mapper.writeValueAsString(skuList));
         goods.setSpecs(specMap);
         return goods;
+    }
+
+    @Override
+    public SearchResult<Goods> searchGoods(SearchRequest searchRequest) {
+        NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder();
+
+        MatchQueryBuilder allMatchQueryBuilder = QueryBuilders.matchQuery("all", searchRequest.getKey())
+                .operator(Operator.AND);
+
+        FetchSourceFilter fetchSourceFilter = new FetchSourceFilter(new String[]{"id", "price" ,"skus", "subTitle"}, null);
+
+        ScoreSortBuilder scoreSortBuilder = SortBuilders.scoreSort();
+
+        PageRequest pageRequest = PageRequest.of((int) searchRequest.getPage(), (int) searchRequest.getSize());
+
+        NativeSearchQuery nativeSearchQuery = nativeSearchQueryBuilder.withQuery(allMatchQueryBuilder)
+                .withSourceFilter( fetchSourceFilter )
+                .withSort(scoreSortBuilder)
+                .withPageable(pageRequest)
+                .build();
+
+        //聚合
+        //BrandID聚合
+        TermsAggregationBuilder buildIdAggrationField = AggregationBuilders
+                .terms(Goods.Aggration.AGGRATION_BRANDID.getName())
+                .field(Goods.Properties.BRANDID.getName());
+        nativeSearchQuery.addAggregation(buildIdAggrationField);
+
+        //CATEGORYID3聚合
+        TermsAggregationBuilder categoryId3AggregationField = AggregationBuilders
+                .terms(Goods.Aggration.AGGRATION_CATEGORYID3.getName())
+                .field(Goods.Properties.CATEGORYID3.getName());
+        nativeSearchQuery.addAggregation(categoryId3AggregationField);
+
+        AggregatedPage<Goods> searchResult = (AggregatedPage<Goods>)goodsRepository.search(nativeSearchQuery);
+
+        //打印ElasticSearch QSL
+        System.out.println( nativeSearchQuery.getQuery().toString() );
+//        System.out.println(nativeSearchQueryBuilder.build().getQuery().toString());
+
+        //解析聚合的结果
+        //解析BrandID聚合
+        List<Long> brandIDList = new ArrayList<Long>();
+        LongTerms brandIDLongTerms = (LongTerms)searchResult.getAggregation(Goods.Aggration.AGGRATION_BRANDID.getName());
+        List<LongTerms.Bucket> brandIDBuckets = brandIDLongTerms.getBuckets();
+        for (LongTerms.Bucket brandIDBucket : brandIDBuckets) {
+            long id = brandIDBucket.getKeyAsNumber().longValue();
+            brandIDList.add( id );
+        }
+        //List<String> brandNameList = brandClient.getBrandsByIds(brandIDList).stream().map(a -> a.getName()).collect(Collectors.toList());
+        List<Brand> brandList = brandClient.getBrandsByIds(brandIDList).stream().collect(Collectors.toList());
+
+        //解析CATEGORYID3聚合
+        List<Long> categoryID3List = new ArrayList<Long>();
+        LongTerms categoryID3LongTerms = (LongTerms)searchResult.getAggregation(Goods.Aggration.AGGRATION_CATEGORYID3.getName());
+        List<LongTerms.Bucket> categoryID3Buckets = categoryID3LongTerms.getBuckets();
+        for (LongTerms.Bucket categoryIDBucket : categoryID3Buckets) {
+            long id = categoryIDBucket.getKeyAsNumber().longValue();
+            categoryID3List.add( id );
+        }
+        //List<String> categoryNameList = categoryClient.getCategoryNameByCategoryIds(categoryID3List);
+        Map<Long, String> categoryNameMap = categoryClient.getCategoryByCategoryIds(categoryID3List).stream()
+                .sorted( (a,b) -> Long.valueOf(a.getId()).compareTo(Long.valueOf(b.getId())) )
+                .collect(Collectors.toMap(a -> a.getId(), a -> a.getName()));
+
+        Map<String, List<String>> specListMap = buildSpecAggration(allMatchQueryBuilder, searchRequest.getCategoryid3(), searchRequest);
+
+        //组装PageResult
+        SearchResult<Goods> pageSearchResult = new SearchResult(
+                searchResult.getTotalElements() ,
+                (long)searchResult.getTotalPages() ,
+                searchResult.getContent() ,
+                brandList ,
+                categoryNameMap,
+                specListMap );
+
+        return pageSearchResult;
+    }
+
+    private Map<String,List<String>> buildSpecAggration( QueryBuilder baseQueryBuilder , Long cid3 , SearchRequest searchRequest ) {
+
+        NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder();
+//        MatchQueryBuilder allMatchQueryBuilder = QueryBuilders.matchQuery("all", searchRequest.getKey());
+        NativeSearchQuery nativeSearchQuery = nativeSearchQueryBuilder.withQuery(baseQueryBuilder)
+                .build();
+
+        List<SpecParam> specParamByList = specificationClient.getSpecParamByList(null, cid3, true);
+        for (SpecParam specParam : specParamByList) {
+            if( specParam.getSearching() ){
+                TermsAggregationBuilder agg = AggregationBuilders
+                        .terms( Goods.Aggration.AGGRATION_SPEC.getName() + "_" + Goods.Properties.SPECS.getName() + "." + specParam.getName() )
+                        .field(Goods.Properties.SPECS.getName() + "." + specParam.getName() + ".keyword");
+                nativeSearchQuery.addAggregation( agg );
+            }
+        }
+
+        AggregatedPage<Goods> searchResult = (AggregatedPage<Goods>)goodsRepository.search(nativeSearchQuery);
+
+        Map<String,List<String>> specAggResult = new HashMap<String,List<String>>();
+        for (SpecParam specParam : specParamByList) {
+            if( specParam.getSearching() ) {
+                StringTerms stringTerms = (StringTerms)searchResult.getAggregation(
+                        Goods.Aggration.AGGRATION_SPEC.getName() + "_" + Goods.Properties.SPECS.getName() + "." + specParam.getName());
+                List<String> valueList = new ArrayList<String>();
+                for (StringTerms.Bucket bucket : stringTerms.getBuckets()) {
+                    valueList.add( bucket.getKeyAsString() );
+                }
+                specAggResult.put( specParam.getName() , valueList );
+            }
+        }
+
+        return specAggResult;
     }
 
     private String chooseSegment(String value, SpecParam p) {

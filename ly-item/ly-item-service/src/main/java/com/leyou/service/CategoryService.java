@@ -11,4 +11,6 @@ public interface CategoryService {
     public List<Category> queryLast();
 
     public List<String> getCategoryNameByCategoryIds(List<Long> ids);
+
+    public List<Category> getCategoryByCategoryIds(List<Long> ids);
 }

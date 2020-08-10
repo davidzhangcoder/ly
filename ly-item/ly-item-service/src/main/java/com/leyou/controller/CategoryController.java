@@ -49,4 +49,11 @@ public class CategoryController {
         return ResponseEntity.ok( resultList );
     }
 
+    @GetMapping("getCategoryByCategoryIds")
+    public ResponseEntity<List<Category>> getCategoryByCategoryIds(
+            @RequestParam( name = "ids" , required = true ) List<Long> ids ) {
+        List<Category> resultList = categoryService.getCategoryByCategoryIds(ids);
+        return ResponseEntity.ok( resultList );
+    }
+
 }

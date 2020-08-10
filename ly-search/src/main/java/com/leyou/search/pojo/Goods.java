@@ -11,6 +11,46 @@ import java.util.Map;
 
 @Document(indexName = "goods", type = "docs", shards = 1, replicas = 0)
 public class Goods {
+
+    public static enum Aggration {
+        AGGRATION_BRANDID( Properties.BRANDID.getName() ),
+        AGGRATION_CATEGORYID3( Properties.CATEGORYID3.getName() ),
+        AGGRATION_SPEC( Properties.SPECS.getName() );
+
+        private String name="";
+
+        private Aggration(String name){
+            this.name = name;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+    }
+
+    public static enum Properties {
+        BRANDID ( "brandId" ),
+        CATEGORYID3 ( "cid3" ),
+        SPECS( "specs" );
+
+        private String name = "";
+        private Properties( String name ){
+            this.name = name;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+    }
+
     @Id
     private Long id; // spuId
 
