@@ -15,10 +15,7 @@ import com.leyou.search.vo.SearchRequest;
 import com.leyou.search.vo.SearchResult;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
-import org.elasticsearch.index.query.MatchQueryBuilder;
-import org.elasticsearch.index.query.Operator;
-import org.elasticsearch.index.query.QueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.*;
 import org.elasticsearch.search.aggregations.Aggregation;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.terms.LongTerms;
@@ -36,6 +33,7 @@ import org.springframework.data.elasticsearch.core.query.FetchSourceFilter;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import javax.transaction.Transactional;
 import java.io.IOException;
@@ -139,8 +137,7 @@ public class SearchServiceImpl implements SearchService {
     public SearchResult<Goods> searchGoods(SearchRequest searchRequest) {
         NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder();
 
-        MatchQueryBuilder allMatchQueryBuilder = QueryBuilders.matchQuery("all", searchRequest.getKey())
-                .operator(Operator.AND);
+        BoolQueryBuilder baseQuery = buildBaseQuery(searchRequest);
 
         FetchSourceFilter fetchSourceFilter = new FetchSourceFilter(new String[]{"id", "price" ,"skus", "subTitle"}, null);
 
@@ -148,7 +145,7 @@ public class SearchServiceImpl implements SearchService {
 
         PageRequest pageRequest = PageRequest.of((int) searchRequest.getPage(), (int) searchRequest.getSize());
 
-        NativeSearchQuery nativeSearchQuery = nativeSearchQueryBuilder.withQuery(allMatchQueryBuilder)
+        NativeSearchQuery nativeSearchQuery = nativeSearchQueryBuilder.withQuery(baseQuery)
                 .withSourceFilter( fetchSourceFilter )
                 .withSort(scoreSortBuilder)
                 .withPageable(pageRequest)
@@ -167,7 +164,20 @@ public class SearchServiceImpl implements SearchService {
                 .field(Goods.Properties.CATEGORYID3.getName());
         nativeSearchQuery.addAggregation(categoryId3AggregationField);
 
+        //spec聚合
+        List<SpecParam> specParamByList = specificationClient.getSpecParamByList(null, searchRequest.getCategoryid3(), true);
+        for (SpecParam specParam : specParamByList) {
+            if( specParam.getSearching() ){
+                TermsAggregationBuilder agg = AggregationBuilders
+                        .terms( Goods.Aggration.AGGRATION_SPEC.getName() + "_" + Goods.Properties.SPECS.getName() + "." + specParam.getName() )
+                        .field(Goods.Properties.SPECS.getName() + "." + specParam.getName() + ".keyword");
+                nativeSearchQuery.addAggregation( agg );
+            }
+        }
+
+
         AggregatedPage<Goods> searchResult = (AggregatedPage<Goods>)goodsRepository.search(nativeSearchQuery);
+
 
         //打印ElasticSearch QSL
         System.out.println( nativeSearchQuery.getQuery().toString() );
@@ -198,7 +208,22 @@ public class SearchServiceImpl implements SearchService {
                 .sorted( (a,b) -> Long.valueOf(a.getId()).compareTo(Long.valueOf(b.getId())) )
                 .collect(Collectors.toMap(a -> a.getId(), a -> a.getName()));
 
-        Map<String, List<String>> specListMap = buildSpecAggration(allMatchQueryBuilder, searchRequest.getCategoryid3(), searchRequest);
+        //解析spec聚合
+        //Map<String, List<String>> specListMap = buildSpecAggration(allMatchQueryBuilder, searchRequest.getCategoryid3(), searchRequest);
+        Map<String, List<String>> specListMap = new HashMap<String, List<String>>();
+        for (SpecParam specParam : specParamByList) {
+            if( specParam.getSearching() ) {
+                StringTerms stringTerms = (StringTerms)searchResult.getAggregation(
+                        Goods.Aggration.AGGRATION_SPEC.getName() + "_" + Goods.Properties.SPECS.getName() + "." + specParam.getName());
+                List<String> valueList = new ArrayList<String>();
+                for (StringTerms.Bucket bucket : stringTerms.getBuckets()) {
+                    valueList.add( bucket.getKeyAsString() );
+                }
+                specListMap.put( specParam.getName() , valueList );
+            }
+        }
+
+
 
         //组装PageResult
         SearchResult<Goods> pageSearchResult = new SearchResult(
@@ -210,6 +235,30 @@ public class SearchServiceImpl implements SearchService {
                 specListMap );
 
         return pageSearchResult;
+    }
+
+    private BoolQueryBuilder buildBaseQuery(SearchRequest searchRequest) {
+
+        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+
+        MatchQueryBuilder allMatchQuery = QueryBuilders.matchQuery("all", searchRequest.getKey()).operator(Operator.AND);
+        boolQueryBuilder.must().add( allMatchQuery );
+
+        if( !CollectionUtils.isEmpty(searchRequest.getSpecfilters()) ) {
+            for (Map.Entry<String, String> stringStringEntry : searchRequest.getSpecfilters().entrySet()) {
+                String key = stringStringEntry.getKey();
+                String value = stringStringEntry.getValue();
+                if( key.equalsIgnoreCase( Goods.Properties.BRANDID.getName() ) ) {
+                    TermQueryBuilder brandIdBuilder = QueryBuilders.termQuery(Goods.Properties.BRANDID.getName(), Long.parseLong(value));
+                    boolQueryBuilder.filter().add( brandIdBuilder );
+                } else {
+                    TermQueryBuilder specQueryBuilder = QueryBuilders.termQuery(Goods.Properties.SPECS.getName() + "." + key + ".keyword", value);
+                    boolQueryBuilder.filter().add( specQueryBuilder );
+                }
+            }
+        }
+
+        return boolQueryBuilder;
     }
 
     private Map<String,List<String>> buildSpecAggration( QueryBuilder baseQueryBuilder , Long cid3 , SearchRequest searchRequest ) {

@@ -62,4 +62,23 @@ public class GoodsServiceImpl implements GoodsService {
         return pageResult;
     }
 
+    @Override
+    public Spu querySpuById(Long id) {
+
+        return spuDao.findById( id ).orElse( null );
+
+    }
+
+    @Override
+    public Spu testPersistSpu(long id, String title) {
+        Spu spu = spuDao.getOne(id);
+        spu.setTitle( spu.getTitle() + " / 测试" + title);
+
+        spu = spuDao.save( spu );
+
+        //todo: using AOP to send message here?
+
+        return spu;
+    }
+
 }

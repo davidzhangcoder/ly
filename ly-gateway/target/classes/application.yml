@@ -29,6 +29,14 @@ zuul:
       path: /search/**
       serviceId: search-service #eureka中的微服务serviceId
       strip-prefix: false
+    page-service:
+      path: /page/**
+      serviceId: page-service #eureka中的微服务serviceId
+      strip-prefix: false
+    user-service:
+      path: /user/**
+      serviceId: user-service #eureka中的微服务serviceId
+      strip-prefix: false
 #zuul:
 #  prefix: /api # 添加路由前缀 retryable: true
 #  routes:

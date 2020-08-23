@@ -17,12 +17,22 @@ public class SpecificationController {
     @Autowired
     private SpecificationService specificationService;
 
+    /**
+     *  Persistent Specification Group
+     * @param specifications
+     * @return
+     */
     @RequestMapping( method = { RequestMethod.POST } )
     public ResponseEntity<List<SpecGroup>> persistSpecGroup(@RequestBody List<SpecGroup> specifications) {
         return null;
 //        return ResponseEntity.ok( specificationService.persistSpecGroup( specGroupList ) );
     }
 
+    /**
+     * get List of Specification Group by the third level Category ID
+     * @param cid
+     * @return
+     */
     @RequestMapping( value = "getSpecGroup" , method = { RequestMethod.GET } )
     public ResponseEntity<List<SpecGroup>> getSpecGroup(@RequestParam  long cid) {
         return ResponseEntity.ok( specificationService.getSpecGroup(cid) );

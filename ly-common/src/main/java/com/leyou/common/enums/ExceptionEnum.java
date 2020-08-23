@@ -5,8 +5,19 @@ import org.springframework.http.HttpStatus;
 public enum ExceptionEnum {
 
     NAME_IS_NULL(HttpStatus.BAD_REQUEST.value(),"姓名不能为空"),
-    BRAND_SEARCH_LIST_IS_EMPTY(HttpStatus.NOT_FOUND.value(),"品牌搜索结果为空")
+    BRAND_SEARCH_LIST_IS_EMPTY(HttpStatus.NOT_FOUND.value(),"品牌搜索结果为空"),
+
+    DATA_CHECK_TYPE_NOT_EXIST(HttpStatus.BAD_REQUEST.value(),"数据校验类型错误"),
+    INVALID_PARAMETER(HttpStatus.BAD_REQUEST.value(),"参数错误"),
+
+    USER_ALREADY_EXIST(HttpStatus.BAD_REQUEST.value(),"用户已存在"),
+    USER_NOT_EXIST(HttpStatus.BAD_REQUEST.value(),"用户不存在"),
+    USER_PASSWORD_NOT_MATCH(HttpStatus.BAD_REQUEST.value(),"密码错误"),
+
+    CODE_EXPIRED(HttpStatus.BAD_REQUEST.value(),"注册码已过期"),
+    CODE_INVALID(HttpStatus.BAD_REQUEST.value(),"注册码错误"),
     ;
+
 
     private ExceptionEnum(int code, String message) {
         this.code = code;

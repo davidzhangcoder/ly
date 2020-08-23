@@ -1,6 +1,8 @@
 package com.leyou.search.vo;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 public class SearchRequest implements Serializable {
 
@@ -11,6 +13,8 @@ public class SearchRequest implements Serializable {
     private long size;
 
     private long categoryid3;
+
+    private Map<String,String> specfilters = new HashMap<String,String>();
 
     public String getKey() {
         return key;
@@ -42,5 +46,13 @@ public class SearchRequest implements Serializable {
 
     public void setCategoryid3(long categoryid3) {
         this.categoryid3 = categoryid3;
+    }
+
+    public Map<String, String> getSpecfilters() {
+        return specfilters;
+    }
+
+    public void setSpecfilters(Map<String, String> specfilters) {
+        this.specfilters = specfilters;
     }
 }

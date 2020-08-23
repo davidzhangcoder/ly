@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+hello
+</br>
+
+msg: <span th:text="${msg}"></span> 2
+</br>
+
+User: <span th:text="'<p>你好</p>'">default value in span</span>
+</br>
+User: <span th:utext="'<font color=red>你好</font>'">default value in span</span>
+
+<div th:object="${user}">
+    <span th:text="*{name}"></span></br>
+    <span th:text="*{name.split('a')}"></span></br>
+    <span th:text="*{name.split('b')[0]}"></span></br>
+    <p>FirstName: <span th:text="*{name.split(' ')[0]}">Jack</span>.</p></br>
+    <p><span th:text="${#dates.createNow()}"></span></p>
+    <p><span th:text="${#dates.format(#dates.createNow(),'yyyy-MMM-dd')}"></span></p>
+    <p><span th:text="100*200+1>1"></span></p>
+    <span th:text="*{name}?'a1':'a2'"></span></br>
+    <span th:text="false?'a1':'a2'"></span></br>
+
+    <ul>
+        <li th:each="element : ${usersList}">
+            <span th:text="${element.name}"></span>
+        </li>
+    </ul>
+</div>
+
+<script th:inline="javascript">
+    //working following
+    //must put code in /* */
+    var users = /*[[${usersList}]]*/ [];
+    console.log( users );
+
+    //not working following
+    var users1 = //[[${usersList}]]
+        [];
+    console.log( users1 );
+
+    // for ( var u in users ) {
+    //     console.log(u.name);
+    // }
+
+    for (var i = 0; i <users.length ; i++) {
+        console.log(users[i].name);
+    }
+</script>
+</body>
+</html>

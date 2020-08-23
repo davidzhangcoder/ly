@@ -6,6 +6,7 @@ import com.leyou.domain.Spu;
 import com.leyou.domain.SpuDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -28,5 +29,8 @@ public interface GoodsAPI {
             @RequestParam( name = "rowsPerPage" , required = true ) int rowsPerPage,
             @RequestParam( name = "sortBy" , required = true ) String sortBy
     );
+
+    @GetMapping("spu/{id}")
+    public Spu querySpuById(@PathVariable(value="id") Long id);
 
 }
