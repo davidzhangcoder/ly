@@ -1,5 +1,7 @@
 package com.leyou.controller;
 
+import com.leyou.common.enums.ExceptionEnum;
+import com.leyou.common.exception.LyException;
 import com.leyou.domain.User;
 import com.leyou.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,8 +35,12 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-    @GetMapping( value = "check/{data}/{type}query" )
+    @GetMapping( value = "query" )
     public ResponseEntity<User> query(@RequestParam String username , @RequestParam String password ) {
-        return ResponseEntity.ok( userService.query( username , password ) );
+        User user = userService.query(username, password);
+        if (user == null) {
+            throw new LyException(ExceptionEnum.USER_PASSWORD_NOT_MATCH);
+        }
+        return ResponseEntity.ok( user );
     }
 }

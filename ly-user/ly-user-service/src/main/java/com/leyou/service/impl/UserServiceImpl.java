@@ -142,13 +142,14 @@ public class UserServiceImpl implements UserService {
 
         if (!userOptional.isPresent()) {
             logger.info("[用户服务 － query] : 用户不存在");
-            throw new LyException(ExceptionEnum.USER_NOT_EXIST);
+            return null;
         }
 
+        user = userOptional.get();
         String inputPassword = CodecUtils.md5Hex(password, user.getSalt());
-        if(inputPassword.equals(user.getPassword())) {
+        if(!inputPassword.equals(user.getPassword())) {
             logger.info("[用户服务 － query] : 密码错误");
-            throw new LyException(ExceptionEnum.USER_PASSWORD_NOT_MATCH);
+            return null;
         }
 
         return user;

@@ -16,6 +16,8 @@ eureka:
 
 zuul:
   prefix: /api # 添加路由前缀 retryable: true
+  add-host-header: true #携带请求本身的head信息
+  sensitive-headers:  #敏感头过滤, 配置禁止使用的头信息，这里设置为null,否则set-cookie无效
   routes:
     item-service:
       path: /item-service/**
@@ -36,6 +38,10 @@ zuul:
     user-service:
       path: /user/**
       serviceId: user-service #eureka中的微服务serviceId
+      strip-prefix: false
+    auth-service:
+      path: /auth/**
+      serviceId: auth-service #eureka中的微服务serviceId
       strip-prefix: false
 #zuul:
 #  prefix: /api # 添加路由前缀 retryable: true
@@ -60,3 +66,22 @@ hystrix:
         isolation:
           thread:
             timeoutInMillisecond: 10000 # 熔断超时时长:10000ms
+
+leyou:
+  jwt:
+    pubKeyPath: /Users/davidzhang/Documents/dockerworkspace/rsa/rsa.pub # 公钥地址
+    cookieName: LY_TOKEN
+  filter:
+    allowPaths:
+      - /api/auth
+      - /api/search
+      - /api/user/login
+      - /api/user/register
+      - /api/user/code
+      - /api/user/query
+      - /api/item-service
+
+
+
+
+

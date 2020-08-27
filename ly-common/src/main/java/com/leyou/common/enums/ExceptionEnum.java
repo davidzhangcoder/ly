@@ -13,9 +13,13 @@ public enum ExceptionEnum {
     USER_ALREADY_EXIST(HttpStatus.BAD_REQUEST.value(),"用户已存在"),
     USER_NOT_EXIST(HttpStatus.BAD_REQUEST.value(),"用户不存在"),
     USER_PASSWORD_NOT_MATCH(HttpStatus.BAD_REQUEST.value(),"密码错误"),
+    USER_UNAUTHORIZED(HttpStatus.UNAUTHORIZED.value(),"未授权用户"),
 
     CODE_EXPIRED(HttpStatus.BAD_REQUEST.value(),"注册码已过期"),
     CODE_INVALID(HttpStatus.BAD_REQUEST.value(),"注册码错误"),
+
+    AUTH_TOKEN_ERROR(HttpStatus.INTERNAL_SERVER_ERROR.value(),"令牌生成错误"),
+    AUTH_PUBLIC_KEY_NOT_EXIST(HttpStatus.INTERNAL_SERVER_ERROR.value(),"公钥文件不存在1"),
     ;
 
 
