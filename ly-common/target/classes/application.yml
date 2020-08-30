@@ -1,0 +1,6 @@
+#leyou:
+#  transaction:
+#    exchange: leyou.transaction.exchange
+#    queue: leyou.transaction.queue
+#    routingKey: leyou.transaction.routingKey
+#    exchangeType: direct

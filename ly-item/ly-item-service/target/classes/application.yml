@@ -14,13 +14,13 @@ spring:
 #      minimum-idle: 10
   jpa:
     database: mysql
-    show-sql: true
+    show-sql: false
     properties:
       hibernate.hbm2ddl.auto: update
       hibernate.dialect: org.hibernate.dialect.MySQL5InnoDBDialect
       hibernate.format_sql: true
   rabbitmq:
-    host: 192.168.1.5
+    host: 192.168.1.17
     username: leyou
     password: leyou
     virtual-host: /leyou
@@ -43,3 +43,10 @@ eureka:
     prefer-ip-address: true
     ip-address: 127.0.0.1
     #instance-id: ${spring.application.name}:${server.port}
+
+leyou:
+  transaction:
+    exchange: leyou.transaction.exchange
+    queue: leyou.transaction.queue
+    routingKey: leyou.transaction.routingKey
+    exchangeType: direct
