@@ -38,12 +38,6 @@ public class TransactionalMessageManagementService {
 
     private Logger log = LoggerFactory.getLogger(TransactionalMessageManagementService.class);
 
-//    public TransactionalMessageManagementService(TransactionalMessageDao messageDao, TransactionalMessageContentDao contentDao, RabbitTemplate rabbitTemplate) {
-//        this.messageDao = messageDao;
-//        this.contentDao = contentDao;
-//        this.leyouTransactionRabbitTemplate = rabbitTemplate;
-//    }
-
     private static final LocalDateTime END = LocalDateTime.of(2999, 1, 1, 0, 0, 0);
     private static final long DEFAULT_INIT_BACKOFF = 10L;
     private static final int DEFAULT_BACKOFF_FACTOR = 2;
@@ -81,54 +75,19 @@ public class TransactionalMessageManagementService {
         contentDao.save(messageContent);
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+//    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void sendMessageSync(final TransactionalMessage record, String content) {
-
-//        try {
-
-
-//            rabbitTemplate.setConfirmCallback(new RabbitTemplate.ConfirmCallback(){
-//                @Override
-//                public void confirm(CorrelationData correlationData, boolean ack, String cause) {
-//                    if(ack) {
-//                        // 标记成功
-//                        //record = messageDao.getOne(record.getId());
-//                        log.info("发送消息成功,目标队列:{},消息内容:{}", record.getQueueName(), content);
-//                        markSuccess(record);
-//                    }
-//                }
-//            });
-//
-//            rabbitTemplate.setReturnCallback(new RabbitTemplate.ReturnCallback(){
-//
-//                @Override
-//                public void returnedMessage(Message message, int replyCode, String replyText,
-//                                            String exchange, String routingKey) {
-//                    //record = messageDao.getOne(record.getId());
-//                    // 标记失败
-//                    markFail(record, replyCode);
-//                }
-//            });
 
         CorrelationData correlationData = new CorrelationData( record.getId() + "" );
 
         leyouTransactionRabbitTemplate.convertAndSend(record.getExchangeName(), record.getRoutingKey(), content , correlationData );
 
+        log.info("sendMessageSync : " + Thread.currentThread().getName());
 
-////            if (log.isDebugEnabled()) {
-////                log.debug("发送消息成功,目标队列:{},消息内容:{}", record.getQueueName(), content);
-////            }
-////            // 标记成功
-////            record = messageDao.getOne(record.getId());
-////            markSuccess(record);
-//        } catch (Exception e) {
-//            // 标记失败
-//            markFail(record, e);
-//        }
     }
 
     private void markSuccess(TransactionalMessage record) {
-        log.info("发送消息成功,目标队列:{},消息内容:{}", record.getQueueName());
+        log.info("发送消息成功 :{}", Thread.currentThread().getName());
         // 标记下一次执行时间为最大值
         record.setNextScheduleTime(END);
         record.setCurrentRetryTimes(record.getCurrentRetryTimes().compareTo(record.getMaxRetryTimes()) >= 0 ?
@@ -139,7 +98,7 @@ public class TransactionalMessageManagementService {
     }
 
     private void markFail(TransactionalMessage record, String e) {
-        log.info("发送消息失败,目标队列:{}", record.getQueueName(), e);
+        log.info("发送消息失败 :{}", Thread.currentThread().getName());
         record.setCurrentRetryTimes(record.getCurrentRetryTimes().compareTo(record.getMaxRetryTimes()) >= 0 ?
                 record.getMaxRetryTimes() : record.getCurrentRetryTimes() + 1);
         // 计算下一次的执行时间

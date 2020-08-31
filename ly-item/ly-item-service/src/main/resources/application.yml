@@ -9,21 +9,29 @@ spring:
     url: jdbc:mysql://localhost:3306/leyou1?useUnicode=true&characterEncoding=UTF-8
     username: root
     password: ""
-#    hikari:
-#      maximum-pool-size: 30
-#      minimum-idle: 10
+    hikari:
+      maximum-pool-size: 1
+      minimum-idle: 1
+      auto-commit: true
   jpa:
     database: mysql
     show-sql: false
+    open-in-view: false
     properties:
       hibernate.hbm2ddl.auto: update
       hibernate.dialect: org.hibernate.dialect.MySQL5InnoDBDialect
       hibernate.format_sql: true
   rabbitmq:
-    host: 192.168.1.17
+    host: 192.168.1.3
     username: leyou
     password: leyou
     virtual-host: /leyou
+    listener:
+      simple:
+        prefetch: 1
+        retry:
+          enabled: true
+          max-attempts: 3
     template:
       retry:
         enabled: true
@@ -32,6 +40,7 @@ spring:
         multiplier: 2
       exchange: leyou.item.exchange
     publisher-confirms: true
+    publisher-returns: true
 
 eureka:
   client:
@@ -44,9 +53,16 @@ eureka:
     ip-address: 127.0.0.1
     #instance-id: ${spring.application.name}:${server.port}
 
+
 leyou:
   transaction:
     exchange: leyou.transaction.exchange
     queue: leyou.transaction.queue
     routingKey: leyou.transaction.routingKey
     exchangeType: direct
+
+logging:
+  level:
+    com:
+      zaxxer:
+        hikari: info

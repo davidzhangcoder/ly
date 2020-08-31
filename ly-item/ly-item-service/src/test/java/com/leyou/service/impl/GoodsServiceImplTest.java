@@ -21,8 +21,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 @SpringBootTest
 public class GoodsServiceImplTest {
 
-    @Autowired
-    private AmqpTemplate amqpTemplate;
+//    @Autowired
+//    private AmqpTemplate amqpTemplate;
 
     @Autowired
     private GoodsService goodsService;
@@ -30,12 +30,12 @@ public class GoodsServiceImplTest {
     @Autowired
     private BusinessServiceInterface businessServiceInterface;
 
-    @Test
-    public void testSendMessage() {
-        Spu spu = goodsService.testPersistSpu(57, " Test1 ");
-
-        amqpTemplate.convertAndSend("item.update", spu.getId() );
-    }
+//    @Test
+//    public void testSendMessage() {
+//        Spu spu = goodsService.testPersistSpu(57, " Test1 ");
+//
+//        amqpTemplate.convertAndSend("item.update", spu.getId() );
+//    }
 
     @Test
     public void testSendMessage1() throws Exception {
@@ -49,16 +49,16 @@ public class GoodsServiceImplTest {
     @Test
     public void testSendMessage2() throws Exception {
 //        businessServiceInterface.updateAmount1();
-        AtomicInteger count = new AtomicInteger(0);
+        AtomicInteger count = new AtomicInteger(5);
 
         ExecutorService threadPool = Executors.newFixedThreadPool(5);
-        for (int i = 1; i <= 100; i++) {
+        for (int i = 1; i <= 10000; i++) {
             threadPool.submit(new Runnable() {
                 @Override
                 public void run() {
                     try {
-                        System.out.println( count.getAndIncrement() );
-                        businessServiceInterface.updateAmount1();
+                        //System.out.println( count.getAndIncrement() );
+                        businessServiceInterface.updateAmount1(count.getAndIncrement());
                     } catch (Exception e) {
                         System.out.println("testSendMessage2 error: " + Thread.currentThread().getName() + e.getMessage() );
                     }

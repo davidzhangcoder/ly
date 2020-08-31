@@ -15,6 +15,8 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import java.time.LocalDateTime;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Service
 public class RabbitTransactionalMessageService implements TransactionalMessageService {
@@ -34,6 +36,8 @@ public class RabbitTransactionalMessageService implements TransactionalMessageSe
 //    }
 
     private static final ConcurrentMap<String, Boolean> QUEUE_ALREADY_DECLARE = new ConcurrentHashMap<>();
+
+    ExecutorService threadPool = Executors.newFixedThreadPool(5);
 
     @Override
     public void sendTransactionalMessage(String businessKey , String content) {
@@ -88,7 +92,15 @@ public class RabbitTransactionalMessageService implements TransactionalMessageSe
         TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
             @Override
             public void afterCompletion(int status) {
-                managementService.sendMessageSync(record, content);
+
+                threadPool.submit(new Runnable() {
+                    @Override
+                    public void run() {
+                        managementService.sendMessageSync(record, content);
+                    }
+                });
+
+                //managementService.sendMessageSync(record, content);
             }
         });
     }

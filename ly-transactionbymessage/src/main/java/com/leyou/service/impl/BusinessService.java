@@ -40,18 +40,14 @@ public class BusinessService implements BusinessServiceInterface {
 
     private Logger log = LoggerFactory.getLogger(TransactionalMessageManagementService.class);
 
-//    public MockBusinessService(JdbcTemplate jdbcTemplate, TransactionalMessageService transactionalMessageService, ObjectMapper objectMapper) {
-//        this.jdbcTemplate = jdbcTemplate;
-//        this.transactionalMessageService = transactionalMessageService;
-//        this.objectMapper = objectMapper;
-//    }
-
     @Override
-    @Transactional(rollbackFor = Exception.class)
-    public void updateAmount1() throws Exception {
-        Account1 account1 = account1Dao.getOne(1l );
-        account1.setAmount( account1.getId() -1 );
-        account1Dao.save(account1);
+    @Transactional
+    public void updateAmount1(int count) throws Exception {
+//        Account1 account1 = account1Dao.getOne(1l );
+//        account1.setAmount( account1.getAmount() -1 );
+//        account1Dao.save(account1);
+
+        account1Dao.account1AddAmount(1l, -1l);
 
         Map<String, Object> message = new HashMap<>();
         String toAccountId = "2";
@@ -65,17 +61,20 @@ public class BusinessService implements BusinessServiceInterface {
         );
 
         //制造Exception
-        log.info("Account 1:{}成功...", toAccountId);
+        log.info("Account 1: {} : {} ", count , Thread.currentThread().getName() );
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional
     public void updateAmount2(String id, String amount) {
-        Account2 account2 = account2Dao.getOne(Long.parseLong(id));
-        account2.setAmount( account2.getAmount() + Integer.parseInt(amount) );
-        account2Dao.save(account2);
+//        Account2 account2 = account2Dao.getOne(Long.parseLong(id));
+//        account2.setAmount( account2.getAmount() + Integer.parseInt(amount) );
+//        account2Dao.save(account2);
 
-        //制造Exception
+        log.info("updateAmount2 begin");
+
+        account2Dao.account2AddAmount(Long.parseLong(id),Long.parseLong(amount));
+
         log.info("Account 2:{}成功...", id);
     }
 
@@ -92,17 +91,6 @@ public class BusinessService implements BusinessServiceInterface {
         message.put("orderId", orderId);
         message.put("amount", amount);
         String content = objectMapper.writeValueAsString(message);
-
-//        DefaultDestination defaultDestination = new DefaultDestination();
-//        defaultDestination.setExchangeName("tm.test.exchange");
-//        defaultDestination.setQueueName("tm.test.queue");
-//        defaultDestination.setRoutingKey("tm.test.key");
-//        defaultDestination.setExchangeType(ExchangeType.DIRECT);
-//
-//        DefaultTxMessage defaultTxMessage = new DefaultTxMessage();
-//        defaultTxMessage.setBusinessKey(orderId);
-//        defaultTxMessage.setBusinessModule("SAVE_ORDER");
-//        defaultTxMessage.setContent(content);
 
         transactionalMessageService.sendTransactionalMessage(
                 orderId,
