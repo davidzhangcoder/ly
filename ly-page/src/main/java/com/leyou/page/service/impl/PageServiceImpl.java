@@ -1,10 +1,7 @@
 package com.leyou.page.service.impl;
 
 import com.leyou.domain.*;
-import com.leyou.page.client.BrandClient;
-import com.leyou.page.client.CategoryClient;
-import com.leyou.page.client.GoodsClient;
-import com.leyou.page.client.SpecificationClient;
+import com.leyou.page.client.*;
 import com.leyou.page.service.PageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,6 +34,9 @@ public class PageServiceImpl implements PageService {
 
     @Autowired
     private SpecificationClient specificationClient;
+
+    @Autowired
+    private UserClient userClient;
 
     @Autowired
     private TemplateEngine templateEngine;

@@ -3,6 +3,7 @@ package com.leyou.controller;
 import com.leyou.common.enums.ExceptionEnum;
 import com.leyou.common.exception.LyException;
 import com.leyou.domain.User;
+import com.leyou.seata.TestSeataService;
 import com.leyou.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,6 +17,9 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private TestSeataService testSeataService;
 
     @GetMapping( value = "check/{data}/{type}" )
     public ResponseEntity<Boolean> check(@PathVariable("data") String data,
@@ -42,5 +46,11 @@ public class UserController {
             throw new LyException(ExceptionEnum.USER_PASSWORD_NOT_MATCH);
         }
         return ResponseEntity.ok( user );
+    }
+
+    @GetMapping( value = "seataUpdateAccount2" )
+    public String seataUpdateAccount2(@RequestParam long amount){
+        testSeataService.updateAccount2(amount);
+        return "from amount: " + amount;
     }
 }

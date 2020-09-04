@@ -30,11 +30,6 @@ public class RabbitTransactionalMessageService implements TransactionalMessageSe
     @Autowired
     private TransactionQueueConfiguration transactionQueueConfiguration;
 
-//    public RabbitTransactionalMessageService(AmqpAdmin amqpAdmin, TransactionalMessageManagementService managementService) {
-//        this.amqpAdmin = amqpAdmin;
-//        this.managementService = managementService;
-//    }
-
     private static final ConcurrentMap<String, Boolean> QUEUE_ALREADY_DECLARE = new ConcurrentHashMap<>();
 
     ExecutorService threadPool = Executors.newFixedThreadPool(5);

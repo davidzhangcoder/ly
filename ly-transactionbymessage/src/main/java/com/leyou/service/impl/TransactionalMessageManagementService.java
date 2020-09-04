@@ -8,6 +8,7 @@ import com.leyou.domain.TransactionalMessageContent;
 import com.leyou.enums.TxMessageStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.connection.CorrelationData;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -80,7 +81,12 @@ public class TransactionalMessageManagementService {
 
         CorrelationData correlationData = new CorrelationData( record.getId() + "" );
 
-        leyouTransactionRabbitTemplate.convertAndSend(record.getExchangeName(), record.getRoutingKey(), content , correlationData );
+        try {
+            leyouTransactionRabbitTemplate.convertAndSend(record.getExchangeName(), record.getRoutingKey(), content, correlationData);
+        }
+        catch(AmqpException e){
+            System.out.println("发送失败:原因重连 [可配置] 次都没连上。");
+        }
 
         log.info("sendMessageSync : " + Thread.currentThread().getName());
 

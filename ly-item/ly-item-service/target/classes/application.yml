@@ -5,13 +5,17 @@ spring:
     name: item-service
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
-    driver-class-name: com.mysql.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/leyou1?useUnicode=true&characterEncoding=UTF-8
-    username: root
-    password: ""
+#    driver-class-name: com.mysql.jdbc.Driver
+#    url: jdbc:mysql://localhost:3306/leyou1?useUnicode=true&characterEncoding=UTF-8
+#    username: root
+#    password: ""
     hikari:
-      maximum-pool-size: 1
-      minimum-idle: 1
+      driver-class-name: com.mysql.jdbc.Driver
+      jdbc-url: jdbc:mysql://localhost:3306/leyou1?useUnicode=true&characterEncoding=UTF-8
+      username: root
+      password: ""
+      maximum-pool-size: 5
+      minimum-idle: 5
       auto-commit: true
   jpa:
     database: mysql
@@ -27,10 +31,11 @@ spring:
     password: leyou
     virtual-host: /leyou
     listener:
-      prefetch: 1
-      retry:
-        enabled: true
-        max-attempts: 3
+      simple:
+        prefetch: 1
+        retry:
+          enabled: true
+          max-attempts: 3
     template:
       retry:
         enabled: true
@@ -39,6 +44,7 @@ spring:
         multiplier: 2
       exchange: leyou.item.exchange
     publisher-confirms: true
+    publisher-returns: true
 
 eureka:
   client:

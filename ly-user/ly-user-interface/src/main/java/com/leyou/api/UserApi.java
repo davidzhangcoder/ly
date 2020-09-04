@@ -12,4 +12,7 @@ public interface UserApi {
     @GetMapping( value = "query" )
     public User query(@RequestParam String username , @RequestParam String password );
 
+    @GetMapping( value = "seataUpdateAccount2" )
+    public String seataUpdateAccount2(@RequestParam long amount);
+
 }

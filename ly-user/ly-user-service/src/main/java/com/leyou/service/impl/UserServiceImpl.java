@@ -4,7 +4,7 @@ import com.leyou.common.enums.ExceptionEnum;
 import com.leyou.common.exception.LyException;
 import com.leyou.common.utils.Constants;
 import com.leyou.common.utils.NumberUtils;
-import com.leyou.configuration.RabbitMQConfiguration;
+import com.leyou.configuration.RabbitMQSMSConfiguration;
 import com.leyou.dao.UserDao;
 import com.leyou.domain.User;
 import com.leyou.service.UserService;
@@ -15,7 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Example;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -36,9 +36,10 @@ public class UserServiceImpl implements UserService {
     private UserDao userDao;
 
     @Autowired
-    private RabbitMQConfiguration rabbitMQConfiguration;
+    private RabbitMQSMSConfiguration rabbitMQConfiguration;
 
     @Autowired
+    @Qualifier( value = "leyouSMSRabbitTemplate" )
     private AmqpTemplate amqpTemplate;
 
     @Autowired

@@ -5,13 +5,18 @@ spring:
     name: user-service
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
-    driver-class-name: com.mysql.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/leyou1?useUnicode=true&characterEncoding=UTF-8
-    username: root
-    password: ""
-  #    hikari:
-  #      maximum-pool-size: 30
-  #      minimum-idle: 10
+#    driver-class-name: com.mysql.jdbc.Driver
+#    url: jdbc:mysql://localhost:3306/leyou1?useUnicode=true&characterEncoding=UTF-8
+#    username: root
+#    password: ""
+    hikari:
+      driver-class-name: com.mysql.jdbc.Driver
+      jdbc-url: jdbc:mysql://localhost:3306/leyou1?useUnicode=true&characterEncoding=UTF-8
+      username: root
+      password: ""
+      maximum-pool-size: 5
+      minimum-idle: 5
+      auto-commit: true
   jpa:
     database: mysql
     show-sql: true
@@ -47,3 +52,8 @@ leyou:
   sms:
     smsExchange: ly.sms.exchange
     smsRouteringKey: sms.verify.code
+  transaction:
+    exchange: leyou.transaction.exchange
+    queue: leyou.transaction.queue
+    routingKey: leyou.transaction.routingKey
+    exchangeType: direct

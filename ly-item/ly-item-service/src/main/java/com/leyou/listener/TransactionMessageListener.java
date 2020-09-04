@@ -30,6 +30,8 @@ public class TransactionMessageListener {
         String amount = map.get("amount");
         System.out.println("updateAmount2 : " + Thread.currentThread().getName());
 
+        //int a = 1/0;
+
         businessServiceInterface.updateAmount2(toAccountId , amount);
     }
 

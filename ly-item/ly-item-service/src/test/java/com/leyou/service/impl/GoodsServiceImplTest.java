@@ -1,5 +1,6 @@
 package com.leyou.service.impl;
 
+import com.leyou.seata.TestSeataService;
 import com.leyou.service.BusinessServiceInterface;
 import com.leyou.domain.Spu;
 import com.leyou.service.GoodsService;
@@ -30,12 +31,20 @@ public class GoodsServiceImplTest {
     @Autowired
     private BusinessServiceInterface businessServiceInterface;
 
+    @Autowired
+    private TestSeataService testSeataService;
+
 //    @Test
 //    public void testSendMessage() {
 //        Spu spu = goodsService.testPersistSpu(57, " Test1 ");
 //
 //        amqpTemplate.convertAndSend("item.update", spu.getId() );
 //    }
+
+    @Test
+    public void testSeata(){
+        testSeataService.updateAccount1();
+    }
 
     @Test
     public void testSendMessage1() throws Exception {
@@ -52,7 +61,7 @@ public class GoodsServiceImplTest {
         AtomicInteger count = new AtomicInteger(5);
 
         ExecutorService threadPool = Executors.newFixedThreadPool(5);
-        for (int i = 1; i <= 10000; i++) {
+        for (int i = 1; i <= 100; i++) {
             threadPool.submit(new Runnable() {
                 @Override
                 public void run() {
