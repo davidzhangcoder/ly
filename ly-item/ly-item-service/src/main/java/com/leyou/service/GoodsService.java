@@ -18,4 +18,6 @@ public interface GoodsService {
     public Spu querySpuById(Long id);
 
     public Spu testPersistSpu( long id , String title);
+
+    public List<Sku> getSKUListByIds(List<Long> skuIds);
 }

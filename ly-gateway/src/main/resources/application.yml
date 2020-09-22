@@ -43,6 +43,11 @@ zuul:
       path: /auth/**
       serviceId: auth-service #eureka中的微服务serviceId
       strip-prefix: false
+    cart-service:
+      path: /cart/**
+      serviceId: cart-service #eureka中的微服务serviceId
+      strip-prefix: false
+
 #zuul:
 #  prefix: /api # 添加路由前缀 retryable: true
 #  routes:
@@ -80,6 +85,7 @@ leyou:
       - /api/user/code
       - /api/user/query
       - /api/item-service
+      - /api/page
 
 
 

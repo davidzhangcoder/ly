@@ -4,10 +4,8 @@ import com.leyou.common.vo.PageResult;
 import com.leyou.dao.SkuDao;
 import com.leyou.dao.SpuDao;
 import com.leyou.dao.SpuDetailDao;
-import com.leyou.domain.Brand;
-import com.leyou.domain.Sku;
-import com.leyou.domain.Spu;
-import com.leyou.domain.SpuDetail;
+import com.leyou.dao.StockDao;
+import com.leyou.domain.*;
 import com.leyou.service.GoodsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -18,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service( value = "GoodsServiceImpl" )
 @Transactional
@@ -31,6 +30,9 @@ public class GoodsServiceImpl implements GoodsService {
 
     @Autowired
     private SpuDao spuDao;
+
+    @Autowired
+    private StockDao stockDao;
 
     @Override
     public List<Sku> getSKUBySPUId(long spuid) {
@@ -79,6 +81,21 @@ public class GoodsServiceImpl implements GoodsService {
         //todo: using AOP to send message here?
 
         return spu;
+    }
+
+    @Override
+    public List<Sku> getSKUListByIds(List<Long> skuIds) {
+        List<Sku> skusWithStockBySkuIDs = skuDao.getSkusWithStockBySkuIDs(skuIds);
+
+        for (Sku sku : skusWithStockBySkuIDs) {
+            Stock stock = stockDao.findById(sku.getId()).orElse(null);
+            if(stock != null) {
+                sku.setStock(stock.getStock());
+            }
+        }
+
+
+        return skusWithStockBySkuIDs;
     }
 
 }

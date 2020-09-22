@@ -17,28 +17,28 @@ public class Spu {
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 
-    @OneToOne(targetEntity=Brand.class,fetch=FetchType.LAZY)
+    @OneToOne(targetEntity=Brand.class/*,fetch=FetchType.LAZY*/)
     @JoinColumn(name="brand_id",referencedColumnName="id")
     private Brand brandId;
 
     /**
      * 1级类目
      */
-    @OneToOne(targetEntity=Category.class,fetch=FetchType.LAZY)
+    @OneToOne(targetEntity=Category.class/*,fetch=FetchType.LAZY*/)
     @JoinColumn(name="cid1",referencedColumnName="id")
     private Category category1;
 
     /**
      * 2级类目
      */
-    @OneToOne(targetEntity=Category.class,fetch=FetchType.LAZY)
+    @OneToOne(targetEntity=Category.class/*,fetch=FetchType.LAZY*/)
     @JoinColumn(name="cid2",referencedColumnName="id")
     private Category category2;
 
     /**
      * 3级类目
      */
-    @OneToOne(targetEntity=Category.class,fetch=FetchType.LAZY)
+    @OneToOne(targetEntity=Category.class/*,fetch=FetchType.LAZY*/)
     @JoinColumn(name="cid3",referencedColumnName="id")
     private Category category3;
 

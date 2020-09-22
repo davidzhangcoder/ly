@@ -35,7 +35,8 @@ public class SpecificationController {
      */
     @RequestMapping( value = "getSpecGroup" , method = { RequestMethod.GET } )
     public ResponseEntity<List<SpecGroup>> getSpecGroup(@RequestParam  long cid) {
-        return ResponseEntity.ok( specificationService.getSpecGroup(cid) );
+        List<SpecGroup> specGroup = specificationService.getSpecGroup(cid);
+        return ResponseEntity.ok(specGroup);
     }
 
     @GetMapping("getSpecParamByList")
@@ -44,7 +45,8 @@ public class SpecificationController {
             @RequestParam(value = "cid",required = false)Long cid,
             @RequestParam(value = "searching",required = false)Boolean searching
     ) {
-        return ResponseEntity.ok(specificationService.queryParamByList(gid,cid,searching));
+        List<SpecParam> body = specificationService.queryParamByList(gid, cid, searching);
+        return ResponseEntity.ok(body);
     }
 
 

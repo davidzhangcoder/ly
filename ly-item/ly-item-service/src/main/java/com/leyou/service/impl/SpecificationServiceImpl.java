@@ -39,7 +39,7 @@ public class SpecificationServiceImpl implements SpecificationService {
     public List<SpecGroup> getSpecGroup(long cid) {
         List<SpecGroup> byCategory_id = specificationDao.findByCategory_Id(cid);
         for (SpecGroup specGroup : byCategory_id) {
-//            specGroup.getCategory();
+            specGroup.getCategory();
         }
         return byCategory_id;
     }
@@ -77,3 +77,9 @@ public class SpecificationServiceImpl implements SpecificationService {
         return all;
     }
 }
+
+//2020-09-20 02:48:15.876  WARN 1746 --- [nio-8081-exec-5] .w.s.m.s.DefaultHandlerExceptionResolver :
+//        Resolved [org.springframework.http.converter.HttpMessageNotWritableException:
+//        Could not write JSON: could not initialize proxy [com.leyou.domain.Category#76] - no Session;
+//nested exception is com.fasterxml.jackson.databind.JsonMappingException:
+//        could not initialize proxy [com.leyou.domain.Category#76] - no Session (through reference chain: java.util.ArrayList[0]->com.leyou.domain.SpecParam["category"]->com.leyou.domain.Category$HibernateProxy$uq1yjDLP["name"])]

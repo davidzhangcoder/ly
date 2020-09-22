@@ -18,7 +18,7 @@ public class SpecGroup implements Serializable {
     @Column(name = "id", unique = true, nullable = false)
     private long id;
 
-    @OneToOne(targetEntity=Category.class,fetch=FetchType.LAZY)
+    @OneToOne(targetEntity=Category.class/*,fetch=FetchType.LAZY*/)
     @JoinColumn(name="cid",referencedColumnName="id")
     private Category category;
 
@@ -26,7 +26,7 @@ public class SpecGroup implements Serializable {
     @JsonProperty( value = "group")
     private String name;
 
-    @OneToMany(targetEntity=SpecParam.class,fetch=FetchType.LAZY,mappedBy="specGroupID")
+    @OneToMany(targetEntity=SpecParam.class,/*fetch=FetchType.LAZY,*/fetch=FetchType.EAGER,mappedBy="specGroupID")
 //    @JsonProperty( value = "params")
     private List<SpecParam> specParamList = new ArrayList<SpecParam>();
 

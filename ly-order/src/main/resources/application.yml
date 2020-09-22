@@ -1,0 +1,50 @@
+server:
+  port: 8089
+
+spring:
+  application:
+    name: order-service
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    #    driver-class-name: com.mysql.jdbc.Driver
+    #    url: jdbc:mysql://localhost:3306/leyou1?useUnicode=true&characterEncoding=UTF-8
+    #    username: root
+    #    password: ""
+    hikari:
+      driver-class-name: com.mysql.jdbc.Driver
+      jdbc-url: jdbc:mysql://localhost:3306/leyou1?useUnicode=true&characterEncoding=UTF-8
+      username: root
+      password: ""
+      maximum-pool-size: 5
+      minimum-idle: 5
+      auto-commit: true
+  jpa:
+    database: mysql
+    show-sql: true
+    open-in-view: false
+    properties:
+      hibernate.hbm2ddl.auto: update
+      hibernate.dialect: org.hibernate.dialect.MySQL5InnoDBDialect
+      hibernate.format_sql: true
+  jackson:
+    default-property-inclusion: non_null
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://127.0.0.1:10086/eureka
+    registry-fetch-interval-seconds: 5
+  instance:
+    lease-renewal-interval-in-seconds: 5 # 每隔5秒发送一次心跳 #default 30
+    lease-expiration-duration-in-seconds: 10 # 10秒不发送就过期 #default 90
+    prefer-ip-address: true
+    ip-address: 127.0.0.1
+    #instance-id: ${spring.application.name}:${server.port}
+
+leyou:
+  jwt:
+    pubKeyPath: /Users/davidzhang/Documents/dockerworkspace/rsa/rsa.pub # 公钥地址
+    cookieName: LY_TOKEN
+
+
+

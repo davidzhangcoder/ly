@@ -25,6 +25,12 @@ public class GoodsController {
         return ResponseEntity.ok( skuBySPUIdList );
     }
 
+    @GetMapping("getSKUListByIds")
+    public ResponseEntity<List<Sku>> getSKUListByIds(@RequestParam( name = "ids" , required = true ) List<Long> skuIds) {
+        List<Sku> skuList = goodsService.getSKUListByIds(skuIds);
+        return  ResponseEntity.ok(skuList);
+    }
+
     @GetMapping("getSPUDetailBySPUId")
     public ResponseEntity<SpuDetail> getSPUDetailBySPUId(@RequestParam( name = "spuid" , required = true ) long spuid ) {
         SpuDetail spuDetail = goodsService.getSPUDetailBySPUId(spuid);

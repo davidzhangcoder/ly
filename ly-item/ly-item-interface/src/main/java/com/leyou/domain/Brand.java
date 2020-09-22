@@ -30,7 +30,7 @@ public class Brand implements Serializable {
     @Column(name = "letter")
     private char letter;
 
-    @ManyToMany(cascade = {CascadeType.PERSIST})//级联类型保存
+    @ManyToMany(cascade = {CascadeType.PERSIST},fetch = FetchType.EAGER)//级联类型保存
     @JoinTable(name="tb_category_brand",
             joinColumns = {@JoinColumn(name = "brand_id")},
             inverseJoinColumns = {@JoinColumn(name = "category_id")})

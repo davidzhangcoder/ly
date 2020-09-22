@@ -14,9 +14,12 @@ public class Sku {
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 
-    @OneToOne(targetEntity=Spu.class,fetch=FetchType.LAZY)
+    @OneToOne(targetEntity=Spu.class/*,fetch=FetchType.LAZY*/)
     @JoinColumn(name="spu_id",referencedColumnName="id")
     private Spu spu;
+
+    @Column(name = "spu_id", insertable = false , updatable = false)
+    private Long spuId;
 
     @Column(name = "title")
     private String title;
@@ -56,6 +59,9 @@ public class Sku {
      */
     @Column(name = "last_update_time")
     private Date lastUpdateTime;
+
+    @Transient
+    private Long stock;
 
     public Long getId() {
         return id;
@@ -135,5 +141,21 @@ public class Sku {
 
     public void setLastUpdateTime(Date lastUpdateTime) {
         this.lastUpdateTime = lastUpdateTime;
+    }
+
+    public Long getSpuId() {
+        return spuId;
+    }
+
+    public void setSpuId(Long spuId) {
+        this.spuId = spuId;
+    }
+
+    public Long getStock() {
+        return stock;
+    }
+
+    public void setStock(Long stock) {
+        this.stock = stock;
     }
 }

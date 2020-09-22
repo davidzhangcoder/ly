@@ -16,7 +16,7 @@ public class SpecParam implements Serializable {
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 
-    @OneToOne(targetEntity=Category.class,fetch=FetchType.LAZY)
+    @OneToOne(targetEntity=Category.class/*,fetch=FetchType.LAZY*/)
     @JoinColumn(name="cid",referencedColumnName="id")
     private Category category;
 
