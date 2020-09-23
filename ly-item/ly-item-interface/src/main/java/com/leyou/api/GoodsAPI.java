@@ -18,6 +18,8 @@ public interface GoodsAPI {
     @GetMapping("getSKUBySPUId")
     public List<Sku> getSKUBySPUId(@RequestParam( name = "spuid" , required = true ) long spuid);
 
+    @GetMapping("getSKUListByIds")
+    public List<Sku> getSKUListByIds(@RequestParam( name = "ids" , required = true ) List<Long> skuIds);
 
     @GetMapping("getSPUDetailBySPUId")
     public SpuDetail getSPUDetailBySPUId(@RequestParam( name = "spuid" , required = true ) long spuid ) ;

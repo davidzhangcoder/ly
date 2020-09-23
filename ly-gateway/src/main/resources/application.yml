@@ -47,6 +47,11 @@ zuul:
       path: /cart/**
       serviceId: cart-service #eureka中的微服务serviceId
       strip-prefix: false
+    order-service:
+      path: /order-service/**
+      serviceId: order-service #eureka中的微服务serviceId
+      strip-prefix: false
+
 
 #zuul:
 #  prefix: /api # 添加路由前缀 retryable: true

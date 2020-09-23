@@ -45,6 +45,10 @@ leyou:
   jwt:
     pubKeyPath: /Users/davidzhang/Documents/dockerworkspace/rsa/rsa.pub # 公钥地址
     cookieName: LY_TOKEN
+  worker:
+    workedId: 1
+    dataCenterId: 1
+
 
 
 
