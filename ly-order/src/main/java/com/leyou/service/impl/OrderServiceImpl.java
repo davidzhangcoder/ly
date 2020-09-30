@@ -3,6 +3,8 @@ package com.leyou.service.impl;
 import com.leyou.auth.pojo.UserInfo;
 import com.leyou.client.GoodsClient;
 import com.leyou.common.dto.CartDto;
+import com.leyou.common.enums.ExceptionEnum;
+import com.leyou.common.exception.LyException;
 import com.leyou.common.utils.IdWorker;
 import com.leyou.common.utils.RedisKeyConstants;
 import com.leyou.dao.OrderDao;
@@ -21,10 +23,13 @@ import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
 import io.seata.spring.annotation.GlobalTransactional;
 import org.apache.commons.lang3.StringUtils;
+import org.redisson.Redisson;
+import org.redisson.api.RedissonClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
+import org.springframework.data.redis.core.BoundValueOperations;
 import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.data.redis.core.SessionCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -99,48 +104,36 @@ public class OrderServiceImpl implements OrderService {
         List<Sku> skus = goodsClient.getSKUListByIds(new ArrayList<>(ids));
 
 
+        Set<Long> holdSkuQuantity = new HashSet<>();
+        boolean isHoldSuccess =true;
         for (Sku sku : skus) {
 
-            //test
-//            SessionCallback<Object> callback = new SessionCallback<Object>() {
-//                @Override
-//                public Object execute(RedisOperations operations) throws DataAccessException {
-//                    operations.multi();
-//                    Object o1 = operations.opsForValue().get(RedisKeyConstants.GOODS_STOCK + "10781492357");
-//                    operations.opsForValue().set("nametest", "qinyi");
-//                    Object o2 = operations.opsForValue().get("nametest");
-//                    return operations.exec();
-//                }
-//            };
-//            System.out.println(stringRedisTemplate.execute(callback));
-//            stringRedisTemplate.setEnableTransactionSupport(true);
+            String skuKey =RedisKeyConstants.GOODS_STOCK+sku.getId();
 
-//            BoundValueOperations<String, String> stringStringBoundValueOperations = stringRedisTemplate.boundValueOps(RedisKeyConstants.GOODS_STOCK + "10781492357");
-//            stringStringBoundValueOperations.get();
-//            String stockStr1 = stringRedisTemplate.boundValueOps(RedisKeyConstants.GOODS_STOCK + "10781492357" ).get();
-//            String stockStr2 = stringRedisTemplate.boundValueOps(RedisKeyConstants.GOODS_STOCK + sku.getId()).get();
-
-            long holdQuantity = redisUtil.updateStock(RedisKeyConstants.GOODS_STOCK_LOCK + sku.getId(), RedisKeyConstants.GOODS_STOCK + sku.getId()
-                    , sku.getId(), numMap.get(sku.getId()));
-            if(holdQuantity<=0){
-                //Todo: roll back previous hold
-                throw new RuntimeException("预扣库存失败");
+            BoundValueOperations<String, String> skuOperations = stringRedisTemplate.boundValueOps(skuKey);
+            if (stringRedisTemplate.hasKey(skuKey)) {
+                long stockBySkuId = goodsClient.getStockBySkuId(sku.getId().longValue());
+                skuOperations.setIfAbsent(String.valueOf(stockBySkuId));
             }
 
-//            Integer skuStock = Integer.parseInt( stringRedisTemplate.boundValueOps(RedisKeyConstants.GOODS_STOCK + sku.getId()).get() );
-//
-//            //Todo:
-//            //1.if quantity is empty in redis, then retrieve it from db
-//            //2.try to hold it ( decrease quantity ) atomicly in redis
-//            //3.if can not hold, roll back previous hold inventory and throw exception
-//
-//            if(skuStock==null || skuStock.intValue() == 0) {
-//                stringRedisTemplate.boundValueOps(RedisKeyConstants.GOODS_STOCK + sku.getId());
-//            }
-//
-//            //ToDo: if skuStock greater than 0, decrease quantity
-//            //Todo: if skuStock less then or eqoal 0, roll back previous hold inventory and throw exception
+            Long remainingQuantity = skuOperations.decrement(numMap.get(sku.getId()));
+            if(remainingQuantity!= null && remainingQuantity<0) {
+                isHoldSuccess = false;
+                break;
+            }
+            holdSkuQuantity.add(sku.getId());
 
+        }
+
+        if( !isHoldSuccess ){
+            //roll back quantity
+            //throw exception
+            for (Long skuID : holdSkuQuantity) {
+                String skuKey =RedisKeyConstants.GOODS_STOCK+skuID;
+                BoundValueOperations<String, String> skuOperations = stringRedisTemplate.boundValueOps(skuKey);
+                skuOperations.increment(numMap.get(skuID));
+            }
+            throw new LyException(ExceptionEnum.STOCK_NOT_ENOUGH);
         }
 
 

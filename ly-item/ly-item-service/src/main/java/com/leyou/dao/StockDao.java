@@ -14,4 +14,6 @@ public interface StockDao extends JpaRepository<Stock,Long>, JpaSpecificationExe
     @Modifying
     @Query(value="update tb_stock set stock = stock - :num where sku_id = :skuId and stock >= :num" , nativeQuery=true)
     int decreaseStock(Long skuId, Integer num);
+
+    public Stock getStockBySkuId(Long skuId);
 }

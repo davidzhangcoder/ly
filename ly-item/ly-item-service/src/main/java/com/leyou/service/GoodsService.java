@@ -25,4 +25,6 @@ public interface GoodsService {
     public void decreaseStock(List<CartDto> cartDtos);
 
     public void testFallBack(long id);
+
+    public long getStockBySkuId(long skuID);
 }

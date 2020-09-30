@@ -148,6 +148,12 @@ public class GoodsServiceImpl implements GoodsService {
         }
     }
 
+    @Override
+    public long getStockBySkuId(long skuID) {
+        Stock stockBySkuId = stockDao.getStockBySkuId(skuID);
+        return stockBySkuId!=null&&stockBySkuId.getStock()!=null?stockBySkuId.getStock().longValue():0;
+    }
+
 }
 
 //    结论

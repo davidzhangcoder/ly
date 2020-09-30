@@ -36,6 +36,9 @@ public interface GoodsAPI {
     @PostMapping("stock/decrease")
     public void decreaseStock(@RequestBody List<CartDto> cartDtos);
 
+    @GetMapping(value="getStockBySkuId/{skuID}")
+    public long getStockBySkuId(@PathVariable(value="skuID") long skuID);
+
     @GetMapping(value="testFallBack/{id}")
     public void testFallBack(@PathVariable(value="id") long id);
 

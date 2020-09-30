@@ -73,6 +73,11 @@ public class GoodsController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
+    @GetMapping(value="getStockBySkuId/{skuID}")
+    public long getStockBySkuId(@PathVariable("skuID") long skuID){
+        return goodsService.getStockBySkuId(skuID);
+    }
+
     @GetMapping(value="testFallBack/{id}")
     public void testFallBack(@PathVariable("id") long id) {
         System.out.println("testFallBack");
