@@ -1,12 +1,15 @@
 package com.leyou.service.impl;
 
+import com.leyou.common.dto.CartDto;
+import com.leyou.common.enums.ExceptionEnum;
+import com.leyou.common.exception.LyException;
 import com.leyou.common.vo.PageResult;
-import com.leyou.dao.SkuDao;
-import com.leyou.dao.SpuDao;
-import com.leyou.dao.SpuDetailDao;
-import com.leyou.dao.StockDao;
+import com.leyou.dao.*;
 import com.leyou.domain.*;
 import com.leyou.service.GoodsService;
+import com.netflix.hystrix.HystrixCommandProperties;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -17,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 @Service( value = "GoodsServiceImpl" )
 @Transactional
@@ -33,6 +37,9 @@ public class GoodsServiceImpl implements GoodsService {
 
     @Autowired
     private StockDao stockDao;
+
+    @Autowired
+    private Account1Dao account1Dao;
 
     @Override
     public List<Sku> getSKUBySPUId(long spuid) {
@@ -98,4 +105,83 @@ public class GoodsServiceImpl implements GoodsService {
         return skusWithStockBySkuIDs;
     }
 
+    @Override
+    public void decreaseStock(List<CartDto> cartDtos) {
+        for (CartDto cartDto : cartDtos) {
+            //减库存
+            int count =  stockDao.decreaseStock(cartDto.getSkuId(),cartDto.getNum());
+            if (count <= 0){
+                throw new LyException(ExceptionEnum.STOCK_NOT_ENOUGH);
+            }
+        }
+    }
+
+    @Override
+    @Transactional(timeout = 2)
+    public void testFallBack(long id) {
+
+        Account1 account1 = new Account1();
+        account1.setAmount(1);
+        account1Dao.save(account1);
+
+//        if(id<=0) {
+//            try {
+//                TimeUnit.MILLISECONDS.sleep(4000);
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
+////            int a = 1/0;
+//        }
+
+        Account1 account11 = new Account1();
+        account11.setAmount(11);
+        account1Dao.save(account11);
+
+
+        if(id<=0) {
+            try {
+                TimeUnit.MILLISECONDS.sleep(6000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+//            int a = 1/0;
+        }
+    }
+
 }
+
+//    结论
+//
+//            写道
+//Spring事务超时 = 事务开始时到最后一个Statement创建时时间 + 最后一个Statement的执行时超时时间（即其queryTimeout）。
+//        4、因此
+//
+//        假设事务超时时间设置为2秒；假设sql执行时间为1秒；
+//
+//        如下调用是事务不超时的
+//
+//public void testTimeout() throws InterruptedException {
+//        System.out.println(System.currentTimeMillis());
+//        JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
+//        jdbcTemplate.execute(" update test set hobby = hobby || '1'");
+//        System.out.println(System.currentTimeMillis());
+//        Thread.sleep(3000L);
+//        }
+//        而如下事务超时是起作用的；
+//
+//public void testTimeout() throws InterruptedException {
+//        Thread.sleep(3000L);
+//        System.out.println(System.currentTimeMillis());
+//        JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
+//        jdbcTemplate.execute(" update test set hobby = hobby || '1'");
+//        System.out.println(System.currentTimeMillis());
+//        }
+//        因此，不要忽略应用中如远程调用产生的事务时间和这个事务时间是否对您的事务产生影响。
+//
+//        另外：
+//
+//        1、事务超时不起作用，您要首先检查您的事务起作用了没：可以参考使用Aop工具类诊断常见问题
+//
+//        2、如果您用的JPA，且spring版本低于3.0，可能您的事务超时不起作用：https://jira.springsource.org/browse/SPR-5195
+//
+//        3、如果您用JDBC，但没有用JdbcTemplate，直接使用DateSourceUtils进行事务控制时，要么自己设置Statement的queryTimeout超时时间，要么使用TransactionAwareDataSourceProxy，其在创建Statement时会自动设置其queryTimeout。

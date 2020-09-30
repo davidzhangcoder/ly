@@ -1,10 +1,13 @@
 package com.leyou.controller;
 
+import com.leyou.common.dto.CartDto;
 import com.leyou.common.vo.PageResult;
 import com.leyou.domain.Sku;
 import com.leyou.domain.Spu;
 import com.leyou.domain.SpuDetail;
 import com.leyou.service.GoodsService;
+import com.leyou.service.GoodsServiceHystrix;
+import com.netflix.discovery.converters.Auto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +21,9 @@ public class GoodsController {
 
     @Autowired
     private GoodsService goodsService;
+
+    @Autowired
+    private GoodsServiceHystrix goodsServiceHystrix;
 
     @GetMapping("getSKUBySPUId")
     public ResponseEntity<List<Sku>> getSKUBySPUId(@RequestParam( name = "spuid" , required = true ) long spuid) {
@@ -54,6 +60,24 @@ public class GoodsController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         return ResponseEntity.ok(spu);
+    }
+
+    /**
+     * 减少库存
+     * @param cartDtos
+     * @return
+     */
+    @PostMapping("stock/decrease")
+    public ResponseEntity<Void> decreaseStock(@RequestBody List<CartDto> cartDtos){
+        goodsService.decreaseStock(cartDtos);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @GetMapping(value="testFallBack/{id}")
+    public void testFallBack(@PathVariable("id") long id) {
+        System.out.println("testFallBack");
+
+        goodsServiceHystrix.testFallBack(id);
     }
 
 }

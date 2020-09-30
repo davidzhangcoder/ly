@@ -7,4 +7,8 @@ import java.util.List;
 
 public interface OrderService {
     public Long createOrder(OrderDto orderDto);
+
+    public void testMethod();
+
+    public void orderTestFallBack(long id);
 }

@@ -5,6 +5,7 @@ import com.leyou.cart.interceptor.UserInterceptor;
 import com.leyou.cart.pojo.Cart;
 import com.leyou.cart.service.CartService;
 import com.leyou.common.utils.JsonUtils;
+import com.leyou.common.utils.RedisKeyConstants;
 import net.minidev.json.JSONUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.BoundHashOperations;
@@ -26,6 +27,10 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public void addCart(Cart cart) {
+
+        //test
+        String stockStr = stringRedisTemplate.boundValueOps(RedisKeyConstants.GOODS_STOCK + "10781492357" ).get();
+
         UserInfo userInfo = UserInterceptor.getUserInfo();
 
         String key = KEY_PREFIX + userInfo.getId();

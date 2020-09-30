@@ -19,5 +19,5 @@ leyou:
     secret: leyou@Login(Auth}*^31)&heiMa% # 登录校验的密钥
     pubKeyPath: /Users/davidzhang/Documents/dockerworkspace/rsa/rsa.pub # 公钥地址
     priKeyPath: /Users/davidzhang/Documents/dockerworkspace/rsa/rsa.pri # 私钥地址
-    expire: 3 # 过期时间,单位分钟
+    expire: 30 # 过期时间,单位分钟
     cookieName: LY_TOKEN

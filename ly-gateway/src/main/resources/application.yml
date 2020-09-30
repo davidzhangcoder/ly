@@ -9,8 +9,8 @@ eureka:
     service-url:
       defaultZone: http://127.0.0.1:10086/eureka
     registry-fetch-interval-seconds: 5
-#  instance:
-#    prefer-ip-address: true
+  instance:
+    prefer-ip-address: true
 #    ip-address: 127.0.0.1
 #    instance-id: ${spring.application.name}:${server.port}
 
@@ -48,7 +48,7 @@ zuul:
       serviceId: cart-service #eureka中的微服务serviceId
       strip-prefix: false
     order-service:
-      path: /order-service/**
+      path: /order/**
       serviceId: order-service #eureka中的微服务serviceId
       strip-prefix: false
 

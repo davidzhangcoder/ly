@@ -1,14 +1,12 @@
 package com.leyou.api;
 
+import com.leyou.common.dto.CartDto;
 import com.leyou.common.vo.PageResult;
 import com.leyou.domain.Sku;
 import com.leyou.domain.Spu;
 import com.leyou.domain.SpuDetail;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -34,5 +32,11 @@ public interface GoodsAPI {
 
     @GetMapping("spu/{id}")
     public Spu querySpuById(@PathVariable(value="id") Long id);
+
+    @PostMapping("stock/decrease")
+    public void decreaseStock(@RequestBody List<CartDto> cartDtos);
+
+    @GetMapping(value="testFallBack/{id}")
+    public void testFallBack(@PathVariable(value="id") long id);
 
 }

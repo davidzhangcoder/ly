@@ -1,5 +1,6 @@
 package com.leyou.service;
 
+import com.leyou.common.dto.CartDto;
 import com.leyou.common.vo.PageResult;
 import com.leyou.domain.Sku;
 import com.leyou.domain.Spu;
@@ -20,4 +21,8 @@ public interface GoodsService {
     public Spu testPersistSpu( long id , String title);
 
     public List<Sku> getSKUListByIds(List<Long> skuIds);
+
+    public void decreaseStock(List<CartDto> cartDtos);
+
+    public void testFallBack(long id);
 }

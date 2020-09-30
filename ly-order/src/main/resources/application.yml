@@ -28,6 +28,8 @@ spring:
       hibernate.format_sql: true
   jackson:
     default-property-inclusion: non_null
+  redis:
+    host: 192.168.1.11
 
 eureka:
   client:
@@ -40,6 +42,21 @@ eureka:
     prefer-ip-address: true
     ip-address: 127.0.0.1
     #instance-id: ${spring.application.name}:${server.port}
+
+ribbon:
+  ConnectTimeout: 1000 # 连接超时时间(ms)
+  ReadTimeout: 4000 # 通信超时时间(ms)
+  #OkToRetryOnAllOperations: true # 是否对所有操作重试
+  MaxAutoRetriesNextServer: 0 # 同一服务不同实例的重试次数
+  MaxAutoRetries: 0 # 同一实例的重试次数
+
+#hystrix:
+#  command:
+#    default:
+#      execution:
+#        isolation:
+#          thread:
+#            timeoutInMillisecond: 10000 # 熔断超时时长:10000ms
 
 leyou:
   jwt:

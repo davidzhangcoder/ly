@@ -21,7 +21,8 @@ public enum ExceptionEnum {
     AUTH_TOKEN_ERROR(HttpStatus.INTERNAL_SERVER_ERROR.value(),"令牌生成错误"),
     AUTH_PUBLIC_KEY_NOT_EXIST(HttpStatus.INTERNAL_SERVER_ERROR.value(),"公钥文件不存在1"),
 
-    CREATE_ORDER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR.value(),"创建订单错误")
+    CREATE_ORDER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR.value(),"创建订单错误"),
+    STOCK_NOT_ENOUGH(HttpStatus.INTERNAL_SERVER_ERROR.value(),"扣减库存错误")
     ;
 
 
