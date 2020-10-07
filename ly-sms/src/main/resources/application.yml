@@ -4,9 +4,9 @@ spring:
   application:
     name: sms-service
   rabbitmq:
-    host: 192.168.1.11
+    host: 192.168.1.10
     username: leyou
     password: leyou
     virtual-host: /leyou
   redis:
-    host: 192.168.1.11
+    host: 192.168.1.10

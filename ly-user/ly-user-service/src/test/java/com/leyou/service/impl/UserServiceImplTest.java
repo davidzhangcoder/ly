@@ -1,6 +1,9 @@
 package com.leyou.service.impl;
 
+import com.leyou.dao.UserDao;
+import com.leyou.domain.User;
 import com.leyou.service.UserService;
+import com.leyou.utils.CodecUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Calendar;
+import java.util.Date;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -20,6 +24,9 @@ public class UserServiceImplTest {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private UserDao userDao;
 
     @Test
     public void testDate() {
@@ -47,4 +54,28 @@ public class UserServiceImplTest {
         System.out.println("Done");
 
     }
+
+    /**
+     * 注册5000个用户
+     */
+    @Test
+    public void addUser(){
+        User user = new User();
+        for (int i = 1; i <= 1; i ++){
+            user.setId(null);
+            user.setCreated(new Date());
+            user.setPhone("1883482"+String.format("%04d",i));
+            user.setUsername("username"+i);
+            user.setPassword("abcdefg"+i);
+
+            String salt = CodecUtils.generateSalt();
+            String encodePassword = CodecUtils.md5Hex(user.getPassword(), salt);
+
+            user.setPassword(encodePassword);
+            user.setSalt(salt);
+
+            userDao.save(user);
+        }
+    }
+
 }

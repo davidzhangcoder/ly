@@ -15,12 +15,12 @@ spring:
       jdbc-url: jdbc:mysql://localhost:3306/leyou1?useUnicode=true&characterEncoding=UTF-8
       username: root
       password: ""
-      maximum-pool-size: 5
-      minimum-idle: 5
+      maximum-pool-size: 50
+      minimum-idle: 50
       auto-commit: true
   jpa:
     database: mysql
-    show-sql: true
+    show-sql: false
     open-in-view: false
     properties:
       hibernate.hbm2ddl.auto: update
@@ -29,7 +29,9 @@ spring:
   jackson:
     default-property-inclusion: non_null
   redis:
-    host: 192.168.1.11
+    host: 192.168.1.10
+  swagger2:
+    enabled: true
 
 eureka:
   client:
@@ -65,6 +67,24 @@ leyou:
   worker:
     workedId: 1
     dataCenterId: 1
+
+logging:
+  level:
+    com:
+      zaxxer:
+        hikari: debug
+
+seata:
+  enabled: true #开启配置
+  application-id: seata-spring-boot-starter-samples  #客户端注册ID
+  tx-service-group: default # 事务分组
+  client:
+    rm:
+      lock:
+        lock-retry-interval: 200
+        lock-retry-times: 5
+#        lock-retry-policy-branch-rollback-on-conflict: false
+
 
 
 

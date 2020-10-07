@@ -68,8 +68,19 @@
                     <groupId>io.seata</groupId>
                     <artifactId>seata-spring-boot-starter</artifactId>
                 </exclusion>
+                <exclusion>
+                    <artifactId>seata-all</artifactId>
+                    <groupId>io.seata</groupId>
+                </exclusion>
             </exclusions>
         </dependency>
+
+        <dependency>
+            <groupId>io.seata</groupId>
+            <artifactId>seata-all</artifactId>
+            <version>0.9.0</version>
+        </dependency>
+
 
         <dependency>
             <groupId>com.leyou.service</groupId>
@@ -90,6 +101,7 @@
         </dependency>
 
 
+        <!--    redis    -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-redis</artifactId>
@@ -116,6 +128,20 @@
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-netflix-hystrix</artifactId>
+        </dependency>
+
+
+        <!--    swagger    -->
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger2</artifactId>
+            <version>2.9.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger-ui</artifactId>
+            <version>2.9.2</version>
         </dependency>
 
     </dependencies>

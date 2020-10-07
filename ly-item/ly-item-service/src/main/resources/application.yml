@@ -14,19 +14,19 @@ spring:
       jdbc-url: jdbc:mysql://localhost:3306/leyou1?useUnicode=true&characterEncoding=UTF-8
       username: root
       password: ""
-      maximum-pool-size: 5
-      minimum-idle: 5
+      maximum-pool-size: 50
+      minimum-idle: 50
       auto-commit: true
   jpa:
     database: mysql
-    show-sql: true
+    show-sql: false
     open-in-view: false
     properties:
       hibernate.hbm2ddl.auto: update
       hibernate.dialect: org.hibernate.dialect.MySQL5InnoDBDialect
       hibernate.format_sql: true
   rabbitmq:
-    host: 192.168.1.11
+    host: 192.168.1.10
     username: leyou
     password: leyou
     virtual-host: /leyou
@@ -77,3 +77,17 @@ logging:
     com:
       zaxxer:
         hikari: info
+
+seata:
+  enabled: true #开启配置
+  application-id: seata-spring-boot-starter-samples  #客户端注册ID
+  tx-service-group: default # 事务分组
+  client:
+    rm:
+      lock:
+        lock-retry-interval: 200
+        lock-retry-times: 5
+#        lock-retry-policy-branch-rollback-on-conflict: false
+
+
+

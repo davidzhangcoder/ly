@@ -63,19 +63,31 @@ zuul:
 
 
 ribbon:
-  ConnectTimeout: 250 # 连接超时时间(ms)
-  ReadTimeout: 2000 # 通信超时时间(ms)
+  ConnectTimeout: 1000 # 连接超时时间(ms) # ribbon请求连接的超时时间，默认值2000
+  ReadTimeout: 5000 # 通信超时时间(ms) # 负载均衡超时时间，默认值5000
   #OkToRetryOnAllOperations: true # 是否对所有操作重试
-  MaxAutoRetriesNextServer: 0 # 同一服务不同实例的重试次数
-  MaxAutoRetries: 0 # 同一实例的重试次数
+  MaxAutoRetriesNextServer: 0 # 同一服务不同实例的重试次数 # 对切换实例的重试次数，默认1
+  MaxAutoRetries: 0 # 同一实例的重试次数 # 对当前实例的重试次数，默认0
 
 hystrix:
+  threadpool:
+    default:
+      coreSize: 100
+      maxQueueSize: 1500
+      queueSizeRejectionThreshold: 1000
   command:
     default:
       execution:
         isolation:
-          thread:
+          strategy:
+            thread: THREAD
             timeoutInMillisecond: 10000 # 熔断超时时长:10000ms
+
+#            hystrix.threadpool.default.coreSize=100
+#            hystrix.threadpool.default.maxQueueSize=1500
+#            hystrix.threadpool.default.queueSizeRejectionThreshold=1000
+#            hystrix.command.default.execution.timeout.enabled=false
+#            hystrix.command.default.execution.isolation.strategy=THREAD
 
 leyou:
   jwt:

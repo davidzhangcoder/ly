@@ -29,7 +29,7 @@ public class CartServiceImpl implements CartService {
     public void addCart(Cart cart) {
 
         //test
-        String stockStr = stringRedisTemplate.boundValueOps(RedisKeyConstants.GOODS_STOCK + "10781492357" ).get();
+        //String stockStr = stringRedisTemplate.boundValueOps(RedisKeyConstants.GOODS_STOCK + "10781492357" ).get();
 
         UserInfo userInfo = UserInterceptor.getUserInfo();
 

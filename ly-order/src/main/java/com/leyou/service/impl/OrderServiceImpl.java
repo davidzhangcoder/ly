@@ -70,6 +70,8 @@ public class OrderServiceImpl implements OrderService {
     @GlobalTransactional
     public Long createOrder(OrderDto orderDto) {
 
+        //{"paymentType":1,"carts":[{"skuId":10781492357,"num":6}],"addressId":1}
+
         //1.新增订单
         Order order = new Order();
         //1.1 订单编号  基本信息
@@ -100,8 +102,12 @@ public class OrderServiceImpl implements OrderService {
                 .collect(Collectors.toMap(CartDto::getSkuId, CartDto::getNum));
         //获取所有sku的id
         Set<Long> ids = numMap.keySet();
+
+        long start1 = System.currentTimeMillis();
         //根据id查询sku
         List<Sku> skus = goodsClient.getSKUListByIds(new ArrayList<>(ids));
+        long end1 = System.currentTimeMillis();
+        System.out.println("goodsClient.getSKUListByIds: " + (end1-start1));
 
 
         Set<Long> holdSkuQuantity = new HashSet<>();
@@ -109,20 +115,23 @@ public class OrderServiceImpl implements OrderService {
         for (Sku sku : skus) {
 
             String skuKey =RedisKeyConstants.GOODS_STOCK+sku.getId();
-
+            
             BoundValueOperations<String, String> skuOperations = stringRedisTemplate.boundValueOps(skuKey);
-            if (stringRedisTemplate.hasKey(skuKey)) {
+            if (!stringRedisTemplate.hasKey(skuKey)) {
+                long start2 = System.currentTimeMillis();
                 long stockBySkuId = goodsClient.getStockBySkuId(sku.getId().longValue());
+                long end2 = System.currentTimeMillis();
+                System.out.println("goodsClient.getStockBySkuId: " + (end2-start2));
+
                 skuOperations.setIfAbsent(String.valueOf(stockBySkuId));
             }
 
             Long remainingQuantity = skuOperations.decrement(numMap.get(sku.getId()));
+            holdSkuQuantity.add(sku.getId());
             if(remainingQuantity!= null && remainingQuantity<0) {
                 isHoldSuccess = false;
                 break;
             }
-            holdSkuQuantity.add(sku.getId());
-
         }
 
         if( !isHoldSuccess ){
@@ -162,7 +171,11 @@ public class OrderServiceImpl implements OrderService {
         order.setActualPay(totalPay + order.getPostFee() - 0);
 
         //1.5 写入数据库
+        long start3 = System.currentTimeMillis();
         orderDao.save(order);
+        long end3 = System.currentTimeMillis();
+        System.out.println("orderDao.save(order): " + (end3-start3));
+
 //        int count =  orderMapper.insertSelective(order);
 //        if (count != 1){
 //            logger.error("[创建订单服务order] 创建订单失败,orderId:{}",orderId);
@@ -171,7 +184,11 @@ public class OrderServiceImpl implements OrderService {
 
 
         //2.新增订单详情
+        long start4 = System.currentTimeMillis();
         orderDetailDao.saveAll(details);
+        long end4 = System.currentTimeMillis();
+        System.out.println("orderDetailDao.saveAll(details): " + (end4-start4));
+
 //        count = detailMapper.insertList(details);
 //
 //        if (count != details.size()){
@@ -185,7 +202,10 @@ public class OrderServiceImpl implements OrderService {
         orderStatus.setCreateTime(order.getCreateTime());
         orderStatus.setOrderId(orderId);
         orderStatus.setStatus(OrderStatusEnum.UN_PAY.value());
+        long start5 = System.currentTimeMillis();
         orderStatusDao.save(orderStatus);
+        long end5 = System.currentTimeMillis();
+        System.out.println("orderStatusDao.save(orderStatus): " + (end5-start5));
 
 //        count =  statusMapper.insertSelective(orderStatus);
 //        if (count != 1){
@@ -195,7 +215,10 @@ public class OrderServiceImpl implements OrderService {
 
         //4.减库存   采用同步，在数据库判断
         List<CartDto> cartDtos = orderDto.getCarts();
+        long start6 = System.currentTimeMillis();
         goodsClient.decreaseStock(cartDtos);
+        long end6 = System.currentTimeMillis();
+        System.out.println("goodsClient.decreaseStock(cartDtos): " + (end6-start6));
 
         System.out.println(orderId);
         return orderId;
