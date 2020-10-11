@@ -6,13 +6,14 @@ import com.leyou.cart.pojo.Cart;
 import com.leyou.cart.service.CartService;
 import com.leyou.common.utils.JsonUtils;
 import com.leyou.common.utils.RedisKeyConstants;
-import net.minidev.json.JSONUtil;
+import com.leyou.cart.utils.RedisUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.BoundHashOperations;
+import org.springframework.data.redis.core.BoundValueOperations;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
-import java.security.Key;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,6 +23,12 @@ public class CartServiceImpl implements CartService {
 
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
+
+    @Autowired
+    private RedisTemplate redisTemplate;
+
+    @Autowired
+    private RedisUtil redisUtil;
 
     private static String KEY_PREFIX = "CART:USER:ID";
 
@@ -47,6 +54,32 @@ public class CartServiceImpl implements CartService {
         else {
             operation.put(hashKey, JsonUtils.serialize(cart));
         }
+    }
+
+    @Override
+    public String addCartWithoutLogin(Cart cart, String tempCartID) {
+
+        String uniqueID = tempCartID;
+
+        if (redisTemplate.hasKey(RedisKeyConstants.TEMP_CART_ID + uniqueID)) {
+            BoundHashOperations hashOperations = redisTemplate.boundHashOps(RedisKeyConstants.TEMP_CART_ID + uniqueID);
+            String hashKey = cart.getSkuId().toString();
+            if (hashOperations.hasKey(hashKey)) {
+                Cart cartFromCache = (Cart)hashOperations.get(hashKey);
+                cartFromCache.setNum( cartFromCache.getNum() + cart.getNum() );
+                hashOperations.put(hashKey, cartFromCache);
+            } else {
+                hashOperations.put(hashKey, cart);
+            }
+        }
+        else {
+            uniqueID = String.valueOf(redisUtil.getUniqueID());
+            BoundHashOperations hashOperations = redisTemplate.boundHashOps(RedisKeyConstants.TEMP_CART_ID + uniqueID);
+            String hashKey = cart.getSkuId().toString();
+            hashOperations.put(hashKey, cart);
+        }
+
+        return uniqueID;
     }
 
     @Override

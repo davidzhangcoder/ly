@@ -52,13 +52,19 @@ ribbon:
   MaxAutoRetriesNextServer: 0 # 同一服务不同实例的重试次数
   MaxAutoRetries: 0 # 同一实例的重试次数
 
-#hystrix:
-#  command:
-#    default:
-#      execution:
-#        isolation:
-#          thread:
-#            timeoutInMillisecond: 10000 # 熔断超时时长:10000ms
+hystrix:
+  threadpool:
+    default:
+      coreSize: 100
+      maxQueueSize: 1500
+      queueSizeRejectionThreshold: 1000
+  command:
+    default:
+      execution:
+        isolation:
+          strategy:
+            thread: THREAD
+            timeoutInMillisecond: 7000 # 熔断超时时长:10000ms
 
 leyou:
   jwt:

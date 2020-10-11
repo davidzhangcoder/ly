@@ -26,7 +26,7 @@ spring:
       hibernate.dialect: org.hibernate.dialect.MySQL5InnoDBDialect
       hibernate.format_sql: true
   rabbitmq:
-    host: 192.168.1.11
+    host: 192.168.1.10
     username: leyou
     password: leyou
     virtual-host: /leyou

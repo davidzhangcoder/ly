@@ -18,13 +18,11 @@ import com.leyou.pojo.Order;
 import com.leyou.pojo.OrderDetail;
 import com.leyou.pojo.OrderStatus;
 import com.leyou.service.OrderService;
-import com.leyou.utils.RedisUtil;
+import com.leyou.utils.RedisOrderUtil;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
 import io.seata.spring.annotation.GlobalTransactional;
 import org.apache.commons.lang3.StringUtils;
-import org.redisson.Redisson;
-import org.redisson.api.RedissonClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +35,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @Service(value="OrderServiceImpl")
@@ -62,13 +62,29 @@ public class OrderServiceImpl implements OrderService {
     private StringRedisTemplate stringRedisTemplate;
 
     @Autowired
-    private RedisUtil redisUtil;
+    private RedisOrderUtil redisUtil;
 
-    private Logger logger = LoggerFactory.getLogger(UserInterceptor.class);
+    private Logger logger = LoggerFactory.getLogger(OrderServiceImpl.class);
+
+    public Long createOrder_FallBack(OrderDto orderDto, UserInfo user , Throwable e) {
+        logger.info("createOrder_FallBack: 订单生成错误");
+        System.out.println("createOrder_FallBack: 订单生成错误 " + e.getMessage() );
+        //e.printStackTrace();
+        throw new LyException(ExceptionEnum.ORDER_CREATE_ERROR);
+    }
 
     @Override
     @GlobalTransactional
-    public Long createOrder(OrderDto orderDto) {
+    @HystrixCommand(fallbackMethod = "createOrder_FallBack",
+            commandProperties = {
+                    @HystrixProperty(name="execution.isolation.thread.timeoutInMilliseconds",value="5000"),//已经在application.yml中配置
+                    @HystrixProperty(name = "circuitBreaker.enabled",value = "true"),// 是否开启断路器
+                    @HystrixProperty(name = "circuitBreaker.requestVolumeThreshold",value = "10"),// 请求次数 默认20个, The default rolling window is 10 seconds
+                    @HystrixProperty(name = "circuitBreaker.sleepWindowInMilliseconds",value = "3000"), // 时间窗口期,that we will sleep before trying again after tripping the circuit
+                    @HystrixProperty(name = "circuitBreaker.errorThresholdPercentage",value = "50"),// 失败率达到多少后跳闸, must be >= 50%
+
+            })
+    public Long createOrder(OrderDto orderDto, UserInfo user) throws Exception {
 
         //{"paymentType":1,"carts":[{"skuId":10781492357,"num":6}],"addressId":1}
 
@@ -81,7 +97,6 @@ public class OrderServiceImpl implements OrderService {
         order.setPaymentType(orderDto.getPaymentType());
 
         //1.2 用户信息
-        UserInfo user = UserInterceptor.getUserInfo();
         order.setUserId(user.getId());
         order.setBuyerNick(user.getUsername());
         order.setBuyerRate(false);
@@ -107,7 +122,7 @@ public class OrderServiceImpl implements OrderService {
         //根据id查询sku
         List<Sku> skus = goodsClient.getSKUListByIds(new ArrayList<>(ids));
         long end1 = System.currentTimeMillis();
-        System.out.println("goodsClient.getSKUListByIds: " + (end1-start1));
+        //System.out.println("goodsClient.getSKUListByIds: " + (end1-start1));
 
 
         Set<Long> holdSkuQuantity = new HashSet<>();
@@ -121,7 +136,7 @@ public class OrderServiceImpl implements OrderService {
                 long start2 = System.currentTimeMillis();
                 long stockBySkuId = goodsClient.getStockBySkuId(sku.getId().longValue());
                 long end2 = System.currentTimeMillis();
-                System.out.println("goodsClient.getStockBySkuId: " + (end2-start2));
+                //System.out.println("goodsClient.getStockBySkuId: " + (end2-start2));
 
                 skuOperations.setIfAbsent(String.valueOf(stockBySkuId));
             }
@@ -174,7 +189,7 @@ public class OrderServiceImpl implements OrderService {
         long start3 = System.currentTimeMillis();
         orderDao.save(order);
         long end3 = System.currentTimeMillis();
-        System.out.println("orderDao.save(order): " + (end3-start3));
+        //System.out.println("orderDao.save(order): " + (end3-start3));
 
 //        int count =  orderMapper.insertSelective(order);
 //        if (count != 1){
@@ -182,12 +197,13 @@ public class OrderServiceImpl implements OrderService {
 //            throw new LyException(ExceptionEnum.CREATE_ORDER_ERROR);
 //        }
 
+//        TimeUnit.SECONDS.sleep(8);
 
         //2.新增订单详情
         long start4 = System.currentTimeMillis();
         orderDetailDao.saveAll(details);
         long end4 = System.currentTimeMillis();
-        System.out.println("orderDetailDao.saveAll(details): " + (end4-start4));
+        //System.out.println("orderDetailDao.saveAll(details): " + (end4-start4));
 
 //        count = detailMapper.insertList(details);
 //
@@ -205,7 +221,7 @@ public class OrderServiceImpl implements OrderService {
         long start5 = System.currentTimeMillis();
         orderStatusDao.save(orderStatus);
         long end5 = System.currentTimeMillis();
-        System.out.println("orderStatusDao.save(orderStatus): " + (end5-start5));
+        //System.out.println("orderStatusDao.save(orderStatus): " + (end5-start5));
 
 //        count =  statusMapper.insertSelective(orderStatus);
 //        if (count != 1){
@@ -218,9 +234,14 @@ public class OrderServiceImpl implements OrderService {
         long start6 = System.currentTimeMillis();
         goodsClient.decreaseStock(cartDtos);
         long end6 = System.currentTimeMillis();
-        System.out.println("goodsClient.decreaseStock(cartDtos): " + (end6-start6));
+        //System.out.println("goodsClient.decreaseStock(cartDtos): " + (end6-start6));
 
-        System.out.println(orderId);
+        //System.out.println(orderId);
+
+//            TimeUnit.SECONDS.sleep(8);
+
+//        System.out.println("after sleep!");
+
         return orderId;
     }
 

@@ -8,5 +8,7 @@ public interface CartService {
 
     public void addCart(Cart cart);
 
+    public String addCartWithoutLogin(Cart cart, String tempCartID);
+
     public List<Cart> queryCartList();
 }

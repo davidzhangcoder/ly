@@ -22,7 +22,9 @@ public enum ExceptionEnum {
     AUTH_PUBLIC_KEY_NOT_EXIST(HttpStatus.INTERNAL_SERVER_ERROR.value(),"公钥文件不存在1"),
 
     CREATE_ORDER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR.value(),"创建订单错误"),
-    STOCK_NOT_ENOUGH(HttpStatus.INTERNAL_SERVER_ERROR.value(),"扣减库存错误")
+    STOCK_NOT_ENOUGH(HttpStatus.INTERNAL_SERVER_ERROR.value(),"扣减库存错误"),
+
+    ORDER_CREATE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR.value(),"订单生成错误")
     ;
 
 

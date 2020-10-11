@@ -51,6 +51,11 @@ zuul:
       path: /order/**
       serviceId: order-service #eureka中的微服务serviceId
       strip-prefix: false
+  host:
+    max-total-connections: 2000 #每个服务的http客户端连接池最大连接，默认是200
+    max-per-route-connections: 2000 #每个route可用的最大连接数，默认值是20
+  semaphore:
+    max-semaphores: 2000 #指的是1秒时间窗口内的事务/查询/请求, 默认值是100
 
 
 #zuul:
@@ -64,7 +69,7 @@ zuul:
 
 ribbon:
   ConnectTimeout: 1000 # 连接超时时间(ms) # ribbon请求连接的超时时间，默认值2000
-  ReadTimeout: 5000 # 通信超时时间(ms) # 负载均衡超时时间，默认值5000
+  ReadTimeout: 10000 # 通信超时时间(ms) # 负载均衡超时时间，默认值5000
   #OkToRetryOnAllOperations: true # 是否对所有操作重试
   MaxAutoRetriesNextServer: 0 # 同一服务不同实例的重试次数 # 对切换实例的重试次数，默认1
   MaxAutoRetries: 0 # 同一实例的重试次数 # 对当前实例的重试次数，默认0
