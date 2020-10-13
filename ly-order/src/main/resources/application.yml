@@ -1,9 +1,21 @@
 server:
   port: 8089
+  tomcat:
+    max-threads: 400 # 最大工作线程数，默认200（4核8g内存，线程数800，一般是核数*200。操作系统做线程之间的切换调度是有系统开销的，所以不是越多越好。）
+    min-spare-threads: 100 # 最小工作空闲线程数，默认10
+    accept-count: 1000 # 等待队列长度，默认100
 
 spring:
   application:
     name: order-service
+  zipkin:
+    # 不使用rabbitmq需要配置Zipkin服务器地址
+    base-url: http://localhost:9411
+  sleuth:
+    sampler:
+      # 配置采样比例，生产环境应调小，否则影响系统执行效率，或者改为rabbitMq方式
+      # 一般用0.5
+      probability: 1.0
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
     #    driver-class-name: com.mysql.jdbc.Driver
@@ -55,7 +67,9 @@ ribbon:
 hystrix:
   threadpool:
     default:
-      coreSize: 100
+      coreSize: 300 # core size of thread pool
+      maximumSize: 400 # maximum size of thread pool, it only gets applied if allowMaximumSizeToDivergeFromCoreSize is true
+      allowMaximumSizeToDivergeFromCoreSize: true
       maxQueueSize: 1500
       queueSizeRejectionThreshold: 1000
   command:

@@ -6,6 +6,7 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+        <module name="ly-sleuth" />
         <module name="ly-cart" />
         <module name="ly-auth-service" />
         <module name="ly-registry" />
@@ -43,6 +44,7 @@
       <module name="ly-page" options="-parameters" />
       <module name="ly-registry" options="-parameters" />
       <module name="ly-search" options="-parameters" />
+      <module name="ly-sleuth" options="-parameters" />
       <module name="ly-sms" options="-parameters" />
       <module name="ly-transactionbymessage" options="-parameters" />
       <module name="ly-upload" options="-parameters" />

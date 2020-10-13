@@ -22,6 +22,8 @@
         <module>ly-transactionbymessage</module>
         <module>ly-cart</module>
         <module>ly-order</module>
+        <module>ly-sleuth</module>
+        <module>ly-hystrixdashboard</module>
     </modules>
 
     <parent>

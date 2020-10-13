@@ -144,6 +144,12 @@
             <version>2.9.2</version>
         </dependency>
 
+        <!-- 服务追踪 -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-zipkin</artifactId>
+        </dependency>
+
     </dependencies>
 
 </project>

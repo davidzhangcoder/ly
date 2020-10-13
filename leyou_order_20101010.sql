@@ -22,10 +22,13 @@ desc tb_order_detail;
 desc tb_order_status;
 
 select * from tb_order;
+select count(1) from tb_order;
 -- delete from tb_order where order_id not in (1099652732983312384,1099654463263735808);
 select * from tb_order_detail;
+select count(1) from tb_order_detail;
 -- delete from tb_order_detail where order_id not in (1099652732983312384,1099654463263735808);
 select * from tb_order_status;
+select count(1) from tb_order_status;
 -- delete from tb_order_status where order_id not in (1099652732983312384,1099654463263735808);
 
 select * from undo_log;

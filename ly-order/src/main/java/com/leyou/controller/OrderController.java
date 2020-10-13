@@ -83,6 +83,7 @@ public class OrderController {
     public void testMethod() {
         System.out.println("testMethod");
 
+        System.out.println(successCreated.get() + " failCreated: " + failCreated.get());
         successCreated.set(0);
         failCreated.set(0);
 

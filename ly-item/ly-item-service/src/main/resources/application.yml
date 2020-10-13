@@ -3,6 +3,14 @@ server:
 spring:
   application:
     name: item-service
+  zipkin:
+    # 不使用rabbitmq需要配置Zipkin服务器地址
+    base-url: http://localhost:9411
+  sleuth:
+    sampler:
+      # 配置采样比例，生产环境应调小，否则影响系统执行效率，或者改为rabbitMq方式
+      # 一般用0.5
+      probability: 1.0
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
 #    driver-class-name: com.mysql.jdbc.Driver

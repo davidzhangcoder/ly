@@ -1,0 +1,24 @@
+spring:
+  application:
+    name: zipkin-server
+  datasource:
+    url: jdbc:mysql://localhost:3306/zipkin
+    username: root
+    password: ""
+    driver-class-name: com.mysql.jdbc.Driver
+
+zipkin:
+  enabled: false   #    关闭本工程的推送到zipkin服务的功能
+  discovery-client-enabled: false
+  storage:
+    type: mysql
+
+server:
+  port: 9411
+
+#解决IllegalArgumentException: Prometheus requires that all meters with the same name have the same set of tag keys
+management:
+  metrics:
+    web:
+      server:
+        auto-time-requests: false

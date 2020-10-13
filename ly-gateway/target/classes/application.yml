@@ -3,6 +3,14 @@ server:
 spring:
   application:
     name: api-gateway
+  zipkin:
+    # 不使用rabbitmq需要配置Zipkin服务器地址
+    base-url: http://localhost:9411
+  sleuth:
+    sampler:
+      # 配置采样比例，生产环境应调小，否则影响系统执行效率，或者改为rabbitMq方式
+      # 一般用0.5
+      probability: 1.0
 
 eureka:
   client:
@@ -52,8 +60,8 @@ zuul:
       serviceId: order-service #eureka中的微服务serviceId
       strip-prefix: false
   host:
-    max-total-connections: 2000 #每个服务的http客户端连接池最大连接，默认是200
-    max-per-route-connections: 2000 #每个route可用的最大连接数，默认值是20
+    max-total-connections: 2000 #http客户端连接池最大连接，默认是200， （ HttpClient 总连接数 ）
+    max-per-route-connections: 500 #每个route可用的最大连接数，默认值是20 （ HttpClient 单个服务（即服务发现中的每个服务）连接数 ）
   semaphore:
     max-semaphores: 2000 #指的是1秒时间窗口内的事务/查询/请求, 默认值是100
 
