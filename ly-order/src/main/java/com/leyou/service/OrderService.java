@@ -7,7 +7,7 @@ import com.leyou.pojo.Order;
 import java.util.List;
 
 public interface OrderService {
-    public Long createOrder(OrderDto orderDto, UserInfo user) throws Exception;
+    public Long createOrder(OrderDto orderDto, UserInfo user, long start) throws Exception;
 
     public void testMethod();
 

@@ -1,5 +1,10 @@
 server:
   port: 10010
+  tomcat:
+    max-threads: 400 # 最大工作线程数，默认200（4核8g内存，线程数800，一般是核数*200。操作系统做线程之间的切换调度是有系统开销的，所以不是越多越好。）
+    min-spare-threads: 100 # 最小工作空闲线程数，默认10
+    accept-count: 1000 # 等待队列长度，默认100
+
 spring:
   application:
     name: api-gateway
@@ -64,6 +69,10 @@ zuul:
     max-per-route-connections: 500 #每个route可用的最大连接数，默认值是20 （ HttpClient 单个服务（即服务发现中的每个服务）连接数 ）
   semaphore:
     max-semaphores: 2000 #指的是1秒时间窗口内的事务/查询/请求, 默认值是100
+  #以下2个配置解决了 - 解决Hystrix Dashboard显示中Thread pools一直处于Loading状态
+  ribbon-isolation-strategy: thread #设置Hystrix隔离策略为线程池
+  thread-pool:
+    use-separate-thread-pools: true #每个路由使用独立的线程池
 
 
 #zuul:
@@ -85,22 +94,34 @@ ribbon:
 hystrix:
   threadpool:
     default:
-      coreSize: 100
+      coreSize: 300
       maxQueueSize: 1500
       queueSizeRejectionThreshold: 1000
   command:
     default:
       execution:
         isolation:
+          thread:
+            timeoutInMilliseconds: 3000 # 熔断超时时长:10000ms
           strategy:
             thread: THREAD
-            timeoutInMillisecond: 10000 # 熔断超时时长:10000ms
 
 #            hystrix.threadpool.default.coreSize=100
 #            hystrix.threadpool.default.maxQueueSize=1500
 #            hystrix.threadpool.default.queueSizeRejectionThreshold=1000
 #            hystrix.command.default.execution.timeout.enabled=false
 #            hystrix.command.default.execution.isolation.strategy=THREAD
+
+#暴露全部的监控信息
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+feign:
+  hystrix:
+    enabled: true
 
 leyou:
   jwt:

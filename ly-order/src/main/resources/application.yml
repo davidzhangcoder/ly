@@ -28,7 +28,7 @@ spring:
       username: root
       password: ""
       maximum-pool-size: 50
-      minimum-idle: 50
+      minimum-idle: 30
       auto-commit: true
   jpa:
     database: mysql
@@ -38,10 +38,18 @@ spring:
       hibernate.hbm2ddl.auto: update
       hibernate.dialect: org.hibernate.dialect.MySQL5InnoDBDialect
       hibernate.format_sql: true
+      hibernate.generate_statistics: false
+
   jackson:
     default-property-inclusion: non_null
   redis:
     host: 192.168.1.10
+    jedis:
+      pool:
+        max-active: 100 # 连接池最大连接数（使用负值表示没有限制）
+        max-idle: 100 # 连接池中的最大空闲连接
+        max-wait: 1000 # 连接池最大阻塞等待时间（使用负值表示没有限制）
+        min-idle: 50 # 连接池中的最小空闲连接
   swagger2:
     enabled: true
 
@@ -64,21 +72,28 @@ ribbon:
   MaxAutoRetriesNextServer: 0 # 同一服务不同实例的重试次数
   MaxAutoRetries: 0 # 同一实例的重试次数
 
-hystrix:
-  threadpool:
-    default:
-      coreSize: 300 # core size of thread pool
-      maximumSize: 400 # maximum size of thread pool, it only gets applied if allowMaximumSizeToDivergeFromCoreSize is true
-      allowMaximumSizeToDivergeFromCoreSize: true
-      maxQueueSize: 1500
-      queueSizeRejectionThreshold: 1000
-  command:
-    default:
-      execution:
-        isolation:
-          strategy:
-            thread: THREAD
-            timeoutInMillisecond: 7000 # 熔断超时时长:10000ms
+#hystrix:
+#  threadpool:
+#    default:
+#      coreSize: 300 # core size of thread pool
+#      maximumSize: 400 # maximum size of thread pool, it only gets applied if allowMaximumSizeToDivergeFromCoreSize is true
+#      allowMaximumSizeToDivergeFromCoreSize: true
+#      maxQueueSize: 1500
+#      queueSizeRejectionThreshold: 1000
+#  command:
+#    default:
+#      execution:
+#        isolation:
+#          strategy:
+#            thread: THREAD
+#            timeoutInMillisecond: 7000 # 熔断超时时长:10000ms
+
+#暴露全部的监控信息
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
 
 leyou:
   jwt:
@@ -90,19 +105,22 @@ leyou:
 
 logging:
   level:
+    root: warn
     com:
       zaxxer:
-        hikari: debug
+        hikari: warn
+    io:
+      seata: error
 
 seata:
   enabled: true #开启配置
   application-id: seata-spring-boot-starter-samples  #客户端注册ID
   tx-service-group: default # 事务分组
-  client:
-    rm:
-      lock:
-        lock-retry-interval: 200
-        lock-retry-times: 5
+#  client:
+#    rm:
+#      lock:
+#        lock-retry-interval: 200
+#        lock-retry-times: 5
 #        lock-retry-policy-branch-rollback-on-conflict: false
 
 

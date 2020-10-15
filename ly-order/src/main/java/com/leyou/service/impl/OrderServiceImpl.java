@@ -66,27 +66,30 @@ public class OrderServiceImpl implements OrderService {
 
     private Logger logger = LoggerFactory.getLogger(OrderServiceImpl.class);
 
-    public Long createOrder_FallBack(OrderDto orderDto, UserInfo user , Throwable e) {
+    public Long createOrder_FallBack(OrderDto orderDto, UserInfo user, long start,  Throwable e) {
         logger.info("createOrder_FallBack: 订单生成错误");
-        System.out.println("createOrder_FallBack: 订单生成错误 " + e.getMessage() );
+        System.out.println("createOrder_FallBack: 订单生成错误 " + e );
         //e.printStackTrace();
         throw new LyException(ExceptionEnum.ORDER_CREATE_ERROR);
     }
 
     @Override
     @GlobalTransactional
-    @HystrixCommand(fallbackMethod = "createOrder_FallBack",
-            commandProperties = {
-                    @HystrixProperty(name="execution.isolation.thread.timeoutInMilliseconds",value="5000"),//已经在application.yml中配置
-                    @HystrixProperty(name = "circuitBreaker.enabled",value = "true"),// 是否开启断路器
-                    @HystrixProperty(name = "circuitBreaker.requestVolumeThreshold",value = "10"),// 请求次数 默认20个, The default rolling window is 10 seconds
-                    @HystrixProperty(name = "circuitBreaker.sleepWindowInMilliseconds",value = "3000"), // 时间窗口期,that we will sleep before trying again after tripping the circuit
-                    @HystrixProperty(name = "circuitBreaker.errorThresholdPercentage",value = "50"),// 失败率达到多少后跳闸, must be >= 50%
-
-            })
-    public Long createOrder(OrderDto orderDto, UserInfo user) throws Exception {
+//    @HystrixCommand(fallbackMethod = "createOrder_FallBack",
+//            commandProperties = {
+//                    @HystrixProperty(name="execution.isolation.thread.timeoutInMilliseconds",value="5000"),//已经在application.yml中配置
+//                    @HystrixProperty(name = "circuitBreaker.enabled",value = "true"),// 是否开启断路器
+//                    @HystrixProperty(name = "circuitBreaker.requestVolumeThreshold",value = "10"),// 请求次数 默认20个, The default rolling window is 10 seconds
+//                    @HystrixProperty(name = "circuitBreaker.sleepWindowInMilliseconds",value = "3000"), // 时间窗口期,that we will sleep before trying again after tripping the circuit
+//                    @HystrixProperty(name = "circuitBreaker.errorThresholdPercentage",value = "50"),// 失败率达到多少后跳闸, must be >= 50%
+//
+//            })
+    public Long createOrder(OrderDto orderDto, UserInfo user, long start) throws Exception {
 
         //{"paymentType":1,"carts":[{"skuId":10781492357,"num":6}],"addressId":1}
+
+        long enterTime = System.currentTimeMillis();
+        //logger.warn("start={} , enterTime={}, diff={}", start, enterTime, (enterTime-start) );
 
         //1.新增订单
         Order order = new Order();
@@ -197,7 +200,7 @@ public class OrderServiceImpl implements OrderService {
 //            throw new LyException(ExceptionEnum.CREATE_ORDER_ERROR);
 //        }
 
-//        TimeUnit.SECONDS.sleep(8);
+        //TimeUnit.SECONDS.sleep(4);
 
         //2.新增订单详情
         long start4 = System.currentTimeMillis();
@@ -241,6 +244,9 @@ public class OrderServiceImpl implements OrderService {
 //            TimeUnit.SECONDS.sleep(8);
 
 //        System.out.println("after sleep!");
+
+        //test
+        orderId = (enterTime-start);
 
         return orderId;
     }

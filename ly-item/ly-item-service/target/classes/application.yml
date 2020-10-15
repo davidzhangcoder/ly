@@ -1,5 +1,11 @@
 server:
   port: 8081
+  tomcat:
+    max-threads: 400 # 最大工作线程数，默认200（4核8g内存，线程数800，一般是核数*200。操作系统做线程之间的切换调度是有系统开销的，所以不是越多越好。）
+    min-spare-threads: 100 # 最小工作空闲线程数，默认10
+    accept-count: 1000 # 等待队列长度，默认100
+
+
 spring:
   application:
     name: item-service
@@ -23,7 +29,7 @@ spring:
       username: root
       password: ""
       maximum-pool-size: 50
-      minimum-idle: 50
+      minimum-idle: 30
       auto-commit: true
   jpa:
     database: mysql
@@ -33,6 +39,7 @@ spring:
       hibernate.hbm2ddl.auto: update
       hibernate.dialect: org.hibernate.dialect.MySQL5InnoDBDialect
       hibernate.format_sql: true
+      hibernate.generate_statistics: false
   rabbitmq:
     host: 192.168.1.10
     username: leyou
@@ -82,19 +89,20 @@ leyou:
 
 logging:
   level:
+    root: warn
     com:
       zaxxer:
-        hikari: info
+        hikari: warn
 
 seata:
   enabled: true #开启配置
   application-id: seata-spring-boot-starter-samples  #客户端注册ID
   tx-service-group: default # 事务分组
-  client:
-    rm:
-      lock:
-        lock-retry-interval: 200
-        lock-retry-times: 5
+#  client:
+#    rm:
+#      lock:
+#        lock-retry-interval: 200
+#        lock-retry-times: 5
 #        lock-retry-policy-branch-rollback-on-conflict: false
 
 

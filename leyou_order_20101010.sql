@@ -12,7 +12,7 @@ select * from tb_sku where id = 26266538223;
 
 select * from tb_stock;
 select * from tb_stock where sku_id = 10781492357;
--- update tb_stock set stock=9000 where sku_id = 10781492357;
+-- update tb_stock set stock=99999 where sku_id = 10781492357;
 select count(1) from tb_stock;
 SELECT a.* , b.stock FROM tb_sku a , tb_stock b WHERE a.id in ( 10781492357 ) and a.id = b.sku_id;
 

@@ -108,7 +108,7 @@ public class GoodsServiceImpl implements GoodsService {
     @Override
     public void decreaseStock(List<CartDto> cartDtos) {
         for (CartDto cartDto : cartDtos) {
-//            stockDao.lockStockBySkuId(cartDto.getSkuId());
+            stockDao.lockStockBySkuId(cartDto.getSkuId());
             //减库存
             int count =  stockDao.decreaseStock(cartDto.getSkuId(),cartDto.getNum());
             if (count <= 0){

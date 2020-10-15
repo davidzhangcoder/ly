@@ -158,6 +158,12 @@
             <artifactId>spring-cloud-starter-zipkin</artifactId>
         </dependency>
 
+<!--        &lt;!&ndash;    actuator监控信息的展示    &ndash;&gt;-->
+<!--        <dependency>-->
+<!--            <groupId>org.springframework.boot</groupId>-->
+<!--            <artifactId>spring-boot-starter-actuator</artifactId>-->
+<!--        </dependency>-->
+
     </dependencies>
 
 

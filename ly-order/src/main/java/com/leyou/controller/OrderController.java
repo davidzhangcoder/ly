@@ -60,9 +60,11 @@ public class OrderController {
         long start = System.currentTimeMillis();
         //创建订单
         UserInfo user = UserInterceptor.getUserInfo();
+        Long orderId = -1l;
         try {
-            Long orderId = -1l;
-            orderId = orderService.createOrder(orderDto,user);
+            //Long orderId = -1l;
+            long start1 = System.currentTimeMillis();
+            orderId = orderService.createOrder(orderDto,user,start1);
             long end = System.currentTimeMillis();
             //System.out.println("orderService.createOrder(orderDto): " +  orderId + " : " + (end - start));
             successCreated.incrementAndGet();
@@ -73,7 +75,8 @@ public class OrderController {
         }
 
         long end = System.currentTimeMillis();
-        System.out.println("orderService.createOrder(orderDto): " + (end - start) + " successCreated: " + successCreated.get() + " failCreated: " + failCreated.get());
+        System.out.println("diff: " + orderId + " , total: " + (end - start) );
+        //System.out.println("orderService.createOrder(orderDto): " + (end - start) + " successCreated: " + successCreated.get() + " failCreated: " + failCreated.get());
         return ResponseEntity.ok(end - start);
 
         //return ResponseEntity.ok(orderId);
