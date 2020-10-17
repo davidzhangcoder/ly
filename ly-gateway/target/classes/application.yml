@@ -94,15 +94,21 @@ ribbon:
 hystrix:
   threadpool:
     default:
-      coreSize: 300
-      maxQueueSize: 1500
-      queueSizeRejectionThreshold: 1000
+      coreSize: 20
+      maxQueueSize: 20
+      queueSizeRejectionThreshold: 20 #Queue size rejection threshold is an artificial "max" size at which rejections will occur even if maxQueueSize has not been reached
   command:
+    order-service:
+      circuitBreaker:
+        enabled: true
+        requestVolumeThreshold: 10 #请求次数 默认20个, The default rolling window is 10 seconds
+        sleepWindowInMilliseconds: 30000 #时间窗口期,that we will sleep before trying again after tripping the circuit
+        errorThresholdPercentage: 60 #失败率达到多少后跳闸, must be >= 50%
     default:
       execution:
         isolation:
           thread:
-            timeoutInMilliseconds: 3000 # 熔断超时时长:10000ms
+            timeoutInMilliseconds: 100 # 熔断超时时长:10000ms
           strategy:
             thread: THREAD
 

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @RequestMapping("/order")
@@ -83,21 +84,23 @@ public class OrderController {
     }
 
     @GetMapping(value="testMethod")
-    public void testMethod() {
+    public void testMethod() throws InterruptedException {
         System.out.println("testMethod");
 
         System.out.println(successCreated.get() + " failCreated: " + failCreated.get());
         successCreated.set(0);
         failCreated.set(0);
 
-        orderService.testMethod();
+        TimeUnit.SECONDS.sleep(1);
+
+        //orderService.testMethod();
     }
 
     @GetMapping(value="orderTestFallBack/{id}")
     public void orderTestFallBack(@PathVariable(value="id") long id){
         System.out.println("orderTestFallBack");
 
-        orderService.orderTestFallBack(id);
+        //orderService.orderTestFallBack(id);
     }
 
 }
