@@ -121,12 +121,8 @@ public class OrderServiceImpl implements OrderService {
         //获取所有sku的id
         Set<Long> ids = numMap.keySet();
 
-        //long start1 = System.currentTimeMillis();
         //根据id查询sku
         List<Sku> skus = goodsClient.getSKUListByIds(new ArrayList<>(ids));
-        //long end1 = System.currentTimeMillis();
-        //System.out.println("goodsClient.getSKUListByIds: " + (end1-start1));
-
 
         Set<Long> holdSkuQuantity = new HashSet<>();
         boolean isHoldSuccess =true;
@@ -136,10 +132,7 @@ public class OrderServiceImpl implements OrderService {
             
             BoundValueOperations<String, String> skuOperations = stringRedisTemplate.boundValueOps(skuKey);
             if (!stringRedisTemplate.hasKey(skuKey)) {
-                //long start2 = System.currentTimeMillis();
                 long stockBySkuId = goodsClient.getStockBySkuId(sku.getId().longValue());
-                //long end2 = System.currentTimeMillis();
-                //System.out.println("goodsClient.getStockBySkuId: " + (end2-start2));
 
                 skuOperations.setIfAbsent(String.valueOf(stockBySkuId));
             }
@@ -189,10 +182,7 @@ public class OrderServiceImpl implements OrderService {
         order.setActualPay(totalPay + order.getPostFee() - 0);
 
         //1.5 写入数据库
-        //long start3 = System.currentTimeMillis();
         orderDao.save(order);
-        //long end3 = System.currentTimeMillis();
-        //System.out.println("orderDao.save(order): " + (end3-start3));
 
 //        int count =  orderMapper.insertSelective(order);
 //        if (count != 1){
@@ -200,13 +190,8 @@ public class OrderServiceImpl implements OrderService {
 //            throw new LyException(ExceptionEnum.CREATE_ORDER_ERROR);
 //        }
 
-        //TimeUnit.SECONDS.sleep(4);
-
         //2.新增订单详情
-        //long start4 = System.currentTimeMillis();
         orderDetailDao.saveAll(details);
-        //long end4 = System.currentTimeMillis();
-        //System.out.println("orderDetailDao.saveAll(details): " + (end4-start4));
 
 //        count = detailMapper.insertList(details);
 //
@@ -215,16 +200,12 @@ public class OrderServiceImpl implements OrderService {
 //            throw new LyException(ExceptionEnum.CREATE_ORDER_ERROR);
 //        }
 
-
         //3.新增订单状态
         OrderStatus orderStatus = new OrderStatus();
         orderStatus.setCreateTime(order.getCreateTime());
         orderStatus.setOrderId(orderId);
         orderStatus.setStatus(OrderStatusEnum.UN_PAY.value());
-        //long start5 = System.currentTimeMillis();
         orderStatusDao.save(orderStatus);
-        //long end5 = System.currentTimeMillis();
-        //System.out.println("orderStatusDao.save(orderStatus): " + (end5-start5));
 
 //        count =  statusMapper.insertSelective(orderStatus);
 //        if (count != 1){
@@ -234,19 +215,7 @@ public class OrderServiceImpl implements OrderService {
 
         //4.减库存   采用同步，在数据库判断
         List<CartDto> cartDtos = orderDto.getCarts();
-        //long start6 = System.currentTimeMillis();
         goodsClient.decreaseStock(cartDtos);
-        //long end6 = System.currentTimeMillis();
-        //System.out.println("goodsClient.decreaseStock(cartDtos): " + (end6-start6));
-
-        //System.out.println(orderId);
-
-//            TimeUnit.SECONDS.sleep(8);
-
-//        System.out.println("after sleep!");
-
-        //test
-        //orderId = (enterTime-start);
 
         return orderId;
     }
