@@ -58,29 +58,29 @@ public class OrderController {
     @ApiParam(name = "orderDto",required = true,value = "订单的json对象，包含订单条目和物流信息")
     @ApiResponse(code = 200, message = "订单创建成功")
     public ResponseEntity<Long> createOrder(@RequestBody OrderDto orderDto){
-        long start = System.currentTimeMillis();
+        //long start = System.currentTimeMillis();
         //创建订单
         UserInfo user = UserInterceptor.getUserInfo();
-        Long orderId = -1l;
+        Long orderId = null;
         try {
             //Long orderId = -1l;
-            long start1 = System.currentTimeMillis();
-            orderId = orderService.createOrder(orderDto,user,start1);
-            long end = System.currentTimeMillis();
+            //long start1 = System.currentTimeMillis();
+            orderId = orderService.createOrder(orderDto,user);
+            //long end = System.currentTimeMillis();
             //System.out.println("orderService.createOrder(orderDto): " +  orderId + " : " + (end - start));
-            successCreated.incrementAndGet();
+            //successCreated.incrementAndGet();
         } catch (Exception e) {
             //System.out.println("orderService.createOrder(orderDto): catch (Exception e)" );
-            failCreated.incrementAndGet();
+            //failCreated.incrementAndGet();
             return ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).body(-1l);
         }
 
-        long end = System.currentTimeMillis();
-        System.out.println("diff: " + orderId + " , total: " + (end - start) );
+        //long end = System.currentTimeMillis();
+        //System.out.println("diff: " + orderId + " , total: " + (end - start) );
         //System.out.println("orderService.createOrder(orderDto): " + (end - start) + " successCreated: " + successCreated.get() + " failCreated: " + failCreated.get());
-        return ResponseEntity.ok(end - start);
+        //return ResponseEntity.ok(end - start);
 
-        //return ResponseEntity.ok(orderId);
+        return ResponseEntity.ok(orderId);
     }
 
     @GetMapping(value="testMethod")

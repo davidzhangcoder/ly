@@ -66,7 +66,7 @@ public class OrderServiceImpl implements OrderService {
 
     private Logger logger = LoggerFactory.getLogger(OrderServiceImpl.class);
 
-    public Long createOrder_FallBack(OrderDto orderDto, UserInfo user, long start,  Throwable e) {
+    public Long createOrder_FallBack(OrderDto orderDto, UserInfo user, Throwable e) {
         logger.info("createOrder_FallBack: 订单生成错误");
         System.out.println("createOrder_FallBack: 订单生成错误 " + e );
         //e.printStackTrace();
@@ -84,7 +84,7 @@ public class OrderServiceImpl implements OrderService {
 //                    @HystrixProperty(name = "circuitBreaker.errorThresholdPercentage",value = "50"),// 失败率达到多少后跳闸, must be >= 50%
 //
 //            })
-    public Long createOrder(OrderDto orderDto, UserInfo user, long start) throws Exception {
+    public Long createOrder(OrderDto orderDto, UserInfo user) throws Exception {
 
         //{"paymentType":1,"carts":[{"skuId":10781492357,"num":6}],"addressId":1}
 
@@ -121,10 +121,10 @@ public class OrderServiceImpl implements OrderService {
         //获取所有sku的id
         Set<Long> ids = numMap.keySet();
 
-        long start1 = System.currentTimeMillis();
+        //long start1 = System.currentTimeMillis();
         //根据id查询sku
         List<Sku> skus = goodsClient.getSKUListByIds(new ArrayList<>(ids));
-        long end1 = System.currentTimeMillis();
+        //long end1 = System.currentTimeMillis();
         //System.out.println("goodsClient.getSKUListByIds: " + (end1-start1));
 
 
@@ -136,9 +136,9 @@ public class OrderServiceImpl implements OrderService {
             
             BoundValueOperations<String, String> skuOperations = stringRedisTemplate.boundValueOps(skuKey);
             if (!stringRedisTemplate.hasKey(skuKey)) {
-                long start2 = System.currentTimeMillis();
+                //long start2 = System.currentTimeMillis();
                 long stockBySkuId = goodsClient.getStockBySkuId(sku.getId().longValue());
-                long end2 = System.currentTimeMillis();
+                //long end2 = System.currentTimeMillis();
                 //System.out.println("goodsClient.getStockBySkuId: " + (end2-start2));
 
                 skuOperations.setIfAbsent(String.valueOf(stockBySkuId));
@@ -189,9 +189,9 @@ public class OrderServiceImpl implements OrderService {
         order.setActualPay(totalPay + order.getPostFee() - 0);
 
         //1.5 写入数据库
-        long start3 = System.currentTimeMillis();
+        //long start3 = System.currentTimeMillis();
         orderDao.save(order);
-        long end3 = System.currentTimeMillis();
+        //long end3 = System.currentTimeMillis();
         //System.out.println("orderDao.save(order): " + (end3-start3));
 
 //        int count =  orderMapper.insertSelective(order);
@@ -203,9 +203,9 @@ public class OrderServiceImpl implements OrderService {
         //TimeUnit.SECONDS.sleep(4);
 
         //2.新增订单详情
-        long start4 = System.currentTimeMillis();
+        //long start4 = System.currentTimeMillis();
         orderDetailDao.saveAll(details);
-        long end4 = System.currentTimeMillis();
+        //long end4 = System.currentTimeMillis();
         //System.out.println("orderDetailDao.saveAll(details): " + (end4-start4));
 
 //        count = detailMapper.insertList(details);
@@ -221,9 +221,9 @@ public class OrderServiceImpl implements OrderService {
         orderStatus.setCreateTime(order.getCreateTime());
         orderStatus.setOrderId(orderId);
         orderStatus.setStatus(OrderStatusEnum.UN_PAY.value());
-        long start5 = System.currentTimeMillis();
+        //long start5 = System.currentTimeMillis();
         orderStatusDao.save(orderStatus);
-        long end5 = System.currentTimeMillis();
+        //long end5 = System.currentTimeMillis();
         //System.out.println("orderStatusDao.save(orderStatus): " + (end5-start5));
 
 //        count =  statusMapper.insertSelective(orderStatus);
@@ -234,9 +234,9 @@ public class OrderServiceImpl implements OrderService {
 
         //4.减库存   采用同步，在数据库判断
         List<CartDto> cartDtos = orderDto.getCarts();
-        long start6 = System.currentTimeMillis();
+        //long start6 = System.currentTimeMillis();
         goodsClient.decreaseStock(cartDtos);
-        long end6 = System.currentTimeMillis();
+        //long end6 = System.currentTimeMillis();
         //System.out.println("goodsClient.decreaseStock(cartDtos): " + (end6-start6));
 
         //System.out.println(orderId);
@@ -246,7 +246,7 @@ public class OrderServiceImpl implements OrderService {
 //        System.out.println("after sleep!");
 
         //test
-        orderId = (enterTime-start);
+        //orderId = (enterTime-start);
 
         return orderId;
     }
