@@ -1,5 +1,6 @@
 package com.leyou.service.impl;
 
+import com.google.common.collect.ImmutableList;
 import com.leyou.auth.pojo.UserInfo;
 import com.leyou.client.GoodsClient;
 import com.leyou.common.dto.CartDto;
@@ -26,13 +27,15 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataAccessException;
-import org.springframework.data.redis.core.BoundValueOperations;
-import org.springframework.data.redis.core.RedisOperations;
-import org.springframework.data.redis.core.SessionCallback;
-import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.connection.RedisConnection;
+import org.springframework.data.redis.core.*;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisCluster;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -63,6 +66,13 @@ public class OrderServiceImpl implements OrderService {
 
     @Autowired
     private RedisOrderUtil redisUtil;
+
+    @Autowired
+    private RedisTemplate redisTemplate;
+
+    @Autowired
+    @Qualifier(value="onsale")
+    private DefaultRedisScript onsaleLuaDefaultRedisScript;
 
     private Logger logger = LoggerFactory.getLogger(OrderServiceImpl.class);
 
@@ -124,38 +134,38 @@ public class OrderServiceImpl implements OrderService {
         //根据id查询sku
         List<Sku> skus = goodsClient.getSKUListByIds(new ArrayList<>(ids));
 
-        Set<Long> holdSkuQuantity = new HashSet<>();
-        boolean isHoldSuccess =true;
-        for (Sku sku : skus) {
-
-            String skuKey =RedisKeyConstants.GOODS_STOCK+sku.getId();
-            
-            BoundValueOperations<String, String> skuOperations = stringRedisTemplate.boundValueOps(skuKey);
-            if (!stringRedisTemplate.hasKey(skuKey)) {
-                long stockBySkuId = goodsClient.getStockBySkuId(sku.getId().longValue());
-
-                skuOperations.setIfAbsent(String.valueOf(stockBySkuId));
-            }
-
-            Long remainingQuantity = skuOperations.decrement(numMap.get(sku.getId()));
-            holdSkuQuantity.add(sku.getId());
-            if(remainingQuantity!= null && remainingQuantity<0) {
-                isHoldSuccess = false;
-                break;
-            }
-        }
-
-        if( !isHoldSuccess ){
-            //roll back quantity
-            //throw exception
-            for (Long skuID : holdSkuQuantity) {
-                String skuKey =RedisKeyConstants.GOODS_STOCK+skuID;
-                BoundValueOperations<String, String> skuOperations = stringRedisTemplate.boundValueOps(skuKey);
-                skuOperations.increment(numMap.get(skuID));
-            }
-            throw new LyException(ExceptionEnum.STOCK_NOT_ENOUGH);
-        }
-
+//        Set<Long> holdSkuQuantity = new HashSet<>();
+//        boolean isHoldSuccess =true;
+//        for (Sku sku : skus) {
+//
+//            String skuKey =RedisKeyConstants.GOODS_STOCK+sku.getId();
+//
+//            BoundValueOperations<String, String> skuOperations = stringRedisTemplate.boundValueOps(skuKey);
+//            if (!stringRedisTemplate.hasKey(skuKey)) {
+//                long stockBySkuId = goodsClient.getStockBySkuId(sku.getId().longValue());
+//
+//                skuOperations.setIfAbsent(String.valueOf(stockBySkuId));
+//            }
+//
+//            //decrement是原子操作
+//            Long remainingQuantity = skuOperations.decrement(numMap.get(sku.getId()));
+//            holdSkuQuantity.add(sku.getId());
+//            if(remainingQuantity!= null && remainingQuantity<0) {
+//                isHoldSuccess = false;
+//                break;
+//            }
+//        }
+//
+//        if( !isHoldSuccess ){
+//            //roll back quantity
+//            //throw exception
+//            for (Long skuID : holdSkuQuantity) {
+//                String skuKey =RedisKeyConstants.GOODS_STOCK+skuID;
+//                BoundValueOperations<String, String> skuOperations = stringRedisTemplate.boundValueOps(skuKey);
+//                skuOperations.increment(numMap.get(skuID));
+//            }
+//            throw new LyException(ExceptionEnum.STOCK_NOT_ENOUGH);
+//        }
 
         //准备orderDtail集合
         List<OrderDetail> details = new ArrayList<>();
@@ -250,4 +260,75 @@ public class OrderServiceImpl implements OrderService {
         goodsClient.testFallBack(id);
     }
 
+    @Override
+    public void testLua() {
+        Random random = new Random();
+        int userId = random.nextInt(100);
+
+        //在单机版Redis中运行正常，在集群版Redis中会抛出以下异常
+        //EvalSha is not supported in cluster environment
+//        List<String> keys = Arrays.asList("userlist","1");
+//        List<String> args = Arrays.asList(String.valueOf(userId));
+//        Long execute = (Long)redisTemplate.execute(onsaleLuaDefaultRedisScript, keys, userId);
+//        if(execute != null ) {
+//            if (execute == 1) {
+//                System.out.println("success");
+//            }
+//            else if (execute == 2) {
+//                System.out.println("only one purchased allowed");
+//            }
+//            else if (execute == 3) {
+//                System.out.println("stock is not configured");
+//            }
+//            else if (execute == 4) {
+//                System.out.println("sold out");
+//            }
+//        }
+
+
+        //spring自带的执行脚本方法中，集群模式直接抛出不支持执行脚本异常，此处拿到原redis的connection执行脚本
+        List<String> keys = Arrays.asList("userlist_{onsalea}", "1_{onsalea}");
+        List<String> args = Arrays.asList(String.valueOf(userId));
+        Long result = (Long)redisTemplate.execute(new RedisCallback<Long>() {
+            public Long doInRedis(RedisConnection connection) throws DataAccessException {
+                Object nativeConnection = connection.getNativeConnection();
+                // 集群模式和单点模式虽然执行脚本的方法一样，但是没有共同的接口，所以只能分开执行
+                // 集群
+                if (nativeConnection instanceof JedisCluster) {
+                    return (Long) ((JedisCluster) nativeConnection)
+                            .eval(onsaleLuaDefaultRedisScript.getScriptAsString(), keys, args);
+                }
+
+                // 单点
+                else if (nativeConnection instanceof Jedis) {
+                    return (Long) ((Jedis) nativeConnection)
+                            .eval(onsaleLuaDefaultRedisScript.getScriptAsString(), keys, args);
+                }
+                return null;
+            }
+        });
+
+        if (result != null) {
+            if (result == 1) {
+                System.out.println("success");
+            } else if (result == 2) {
+                System.out.println("only one purchased allowed");
+            } else if (result == 3) {
+                System.out.println("stock is not configured");
+            } else if (result == 4) {
+                System.out.println("sold out");
+            }
+        }
+
+
+    }
+
 }
+
+//20201022
+// leyou,cloud2020,react/angualr,netty,big data
+// 限流lua,
+// fallback error,
+// Done - docker redis,
+// Done - 主从／哨兵,
+// Done - spring 读取主从

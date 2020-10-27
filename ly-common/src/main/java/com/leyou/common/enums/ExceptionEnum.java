@@ -23,6 +23,7 @@ public enum ExceptionEnum {
 
     CREATE_ORDER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR.value(),"创建订单错误"),
     STOCK_NOT_ENOUGH(HttpStatus.INTERNAL_SERVER_ERROR.value(),"扣减库存错误"),
+    STOCK_RETRIEVE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR.value(),"读取库存错误"),
 
     ORDER_CREATE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR.value(),"订单生成错误")
     ;

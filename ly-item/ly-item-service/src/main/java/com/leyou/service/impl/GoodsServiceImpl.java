@@ -3,23 +3,29 @@ package com.leyou.service.impl;
 import com.leyou.common.dto.CartDto;
 import com.leyou.common.enums.ExceptionEnum;
 import com.leyou.common.exception.LyException;
+import com.leyou.common.utils.RedisKeyConstants;
 import com.leyou.common.vo.PageResult;
 import com.leyou.dao.*;
 import com.leyou.domain.*;
 import com.leyou.service.GoodsService;
-import com.netflix.hystrix.HystrixCommandProperties;
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
+//import org.redisson.Redisson;
+//import org.redisson.api.RLock;
+//import org.redisson.api.RedissonClient;
+import org.redisson.Redisson;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 @Service( value = "GoodsServiceImpl" )
@@ -40,6 +46,12 @@ public class GoodsServiceImpl implements GoodsService {
 
     @Autowired
     private Account1Dao account1Dao;
+
+    @Autowired
+    private RedisTemplate redisTemplate;
+
+    @Resource
+    private RedissonClient redisson;
 
     @Override
     public List<Sku> getSKUBySPUId(long spuid) {
@@ -109,7 +121,15 @@ public class GoodsServiceImpl implements GoodsService {
     public void decreaseStock(List<CartDto> cartDtos) {
         for (CartDto cartDto : cartDtos) {
             stockDao.lockStockBySkuId(cartDto.getSkuId());
-            //减库存
+            //1.删除缓存
+            //必须先删除缓存，以保证数据一致性
+            //如果先减数据库库存，再删除缓存，如果删除缓存失败，就会产生数据不一致
+            //如果先删除缓存,再减数据库库存,如果减数据库库存失败,读取时缓存不存在，会从数据库获取
+            String skuKey = RedisKeyConstants.GOODS_STOCK+cartDto.getSkuId();
+            if( redisTemplate.hasKey(skuKey) )
+                redisTemplate.delete(skuKey);
+
+            //2.减库存
             int count =  stockDao.decreaseStock(cartDto.getSkuId(),cartDto.getNum());
             if (count <= 0){
                 throw new LyException(ExceptionEnum.STOCK_NOT_ENOUGH);
@@ -151,8 +171,49 @@ public class GoodsServiceImpl implements GoodsService {
 
     @Override
     public long getStockBySkuId(long skuID) {
-        Stock stockBySkuId = stockDao.getStockBySkuId(skuID);
-        return stockBySkuId!=null&&stockBySkuId.getStock()!=null?stockBySkuId.getStock().longValue():0;
+
+        String skuKey =RedisKeyConstants.GOODS_STOCK+skuID;
+        Long o = getStockbySkuidFromCache(skuID);
+        if (o != null) return o;
+
+        //1.获取一把锁，只要名字一样，就是同一把锁
+        /**
+         * 这里用的是本地的Redis,实际上要做成配置
+         */
+        RLock lock = redisson.getLock(skuKey);
+
+        long stock = 0;
+        //2.加锁和解锁
+        try {
+            lock.lock(); //the thread would hang in here when it didn't get the lock
+            //System.out.println("加锁成功，执行业务方法..."+Thread.currentThread().getId());
+
+            Long stockFromCache = getStockbySkuidFromCache(skuID);
+            if (stockFromCache != null) return stockFromCache;
+
+            Stock stockBySkuId = stockDao.getStockBySkuId(skuID);
+            stock = stockBySkuId != null && stockBySkuId.getStock() != null ? stockBySkuId.getStock().longValue() : 0;
+
+            redisTemplate.opsForValue().set(skuKey, stock);
+
+        } catch (Exception e){
+            throw new LyException(ExceptionEnum.STOCK_RETRIEVE_ERROR);
+        }finally {
+            lock.unlock();
+            //System.out.println("释放锁..."+Thread.currentThread().getId());
+        }
+        return stock;
+    }
+
+    private Long getStockbySkuidFromCache(long skuID) {
+        String skuKey =RedisKeyConstants.GOODS_STOCK+skuID;
+        if (redisTemplate.hasKey(skuKey) ) {
+            Object o = redisTemplate.opsForValue().get(skuKey);
+            if( o != null && o instanceof Long) {
+                return ((Long)o).longValue();
+            }
+        }
+        return null;
     }
 
 }

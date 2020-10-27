@@ -7,6 +7,7 @@ import com.leyou.cart.service.CartService;
 import com.leyou.common.utils.JsonUtils;
 import com.leyou.common.utils.RedisKeyConstants;
 import com.leyou.cart.utils.RedisUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.BoundHashOperations;
 import org.springframework.data.redis.core.BoundValueOperations;

@@ -12,4 +12,6 @@ public interface OrderService {
     public void testMethod();
 
     public void orderTestFallBack(long id);
+
+    public void testLua();
 }

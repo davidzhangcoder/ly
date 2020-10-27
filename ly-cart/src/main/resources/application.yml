@@ -5,7 +5,11 @@ spring:
   application:
     name: cart-service
   redis:
-    host: 192.168.1.10
+    #host: 192.168.1.10 #这个是配单机版
+    enabled: true
+    cluster:
+      nodes: 192.168.1.10:6379, 192.168.1.10:6380, 192.168.1.10:6381, 192.168.1.10:6389, 192.168.1.10:6390, 192.168.1.10:6391
+      max-redirects: 5
   swagger2:
     enabled: true
 

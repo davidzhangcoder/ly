@@ -90,4 +90,9 @@ public class OrderController {
         //orderService.orderTestFallBack(id);
     }
 
+    @GetMapping(value="testLua")
+    public void testLua() {
+        orderService.testLua();
+    }
+
 }

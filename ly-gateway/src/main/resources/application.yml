@@ -16,6 +16,10 @@ spring:
       # 配置采样比例，生产环境应调小，否则影响系统执行效率，或者改为rabbitMq方式
       # 一般用0.5
       probability: 1.0
+  redis:
+    enabled: false
+  redisson:
+    enabled: false
 
 eureka:
   client:

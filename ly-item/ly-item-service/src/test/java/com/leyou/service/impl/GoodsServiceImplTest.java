@@ -6,14 +6,18 @@ import com.leyou.domain.Spu;
 import com.leyou.service.GoodsService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.redisson.api.RedissonClient;
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import javax.annotation.Resource;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -33,6 +37,38 @@ public class GoodsServiceImplTest {
 
     @Autowired
     private TestSeataService testSeataService;
+
+    @Autowired
+    private RedisTemplate<String,Object> redisTemplate;
+
+    @Resource
+    private RedissonClient redissonClient;
+
+    @Test
+    public void testRedisson(){
+        redissonClient.getBucket("v_redisson_1").set("1");
+    }
+
+    @Test
+    public void testRedisson1(){
+        System.out.println(redissonClient.getBucket("v_redisson_1").get());
+    }
+
+
+    @Test
+    public void testRedis() {
+        ValueOperations<String, Object> stringOperation = redisTemplate.opsForValue();
+
+        stringOperation.set("a5_new","1");
+    }
+
+    @Test
+    public void testRedis1() {
+        ValueOperations<String, Object> stringOperation = redisTemplate.opsForValue();
+
+        System.out.println(stringOperation.get("a5_new"));
+    }
+
 
 //    @Test
 //    public void testSendMessage() {

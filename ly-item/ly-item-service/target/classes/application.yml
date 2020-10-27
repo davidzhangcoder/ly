@@ -60,6 +60,26 @@ spring:
       exchange: leyou.item.exchange
     publisher-confirms: true
     publisher-returns: true
+  redis:
+    #host: 192.168.1.10 #这个是配单机版
+    enabled: true
+    cluster:
+      nodes: 192.168.1.10:6379, 192.168.1.10:6380, 192.168.1.10:6381, 192.168.1.10:6389, 192.168.1.10:6390, 192.168.1.10:6391
+      max-redirects: 5
+    jedis:
+      pool:
+        max-active: 10 # 连接池最大连接数（使用负值表示没有限制）
+        max-idle: 5 # 连接池中的最大空闲连接
+        max-wait: 1000 # 连接池最大阻塞等待时间（使用负值表示没有限制）
+        min-idle: 5 # 连接池中的最小空闲连接
+  redisson:
+    enabled: true
+    cluster: true
+
+    #nodes: 192.168.1.10:6379 #这个是配单机版
+    nodes: 192.168.1.10:6379, 192.168.1.10:6380, 192.168.1.10:6381, 192.168.1.10:6389, 192.168.1.10:6390, 192.168.1.10:6391 #这个是配集群版
+
+    #password: xxxx
 
 eureka:
   client:
