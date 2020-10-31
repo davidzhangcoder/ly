@@ -332,3 +332,6 @@ public class OrderServiceImpl implements OrderService {
 // Done - docker redis,
 // Done - 主从／哨兵,
 // Done - spring 读取主从
+
+//20201030
+//4,9,10,14,15

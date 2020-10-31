@@ -1,6 +1,7 @@
 package com.leyou.controller;
 
 import com.leyou.auth.pojo.UserInfo;
+import com.leyou.common.annotation.AccessLimit;
 import com.leyou.dto.OrderDto;
 import com.leyou.interceptor.UserInterceptor;
 import com.leyou.pojo.Order;
@@ -46,6 +47,7 @@ public class OrderController {
         3.
             zuul: 模拟超时
                   fall back方法是否调用
+                  答：应该Zuul上的fall back会调用
             ribbon: 不超时
             hystrix: 不超时
 
@@ -53,8 +55,8 @@ public class OrderController {
 
     @PostMapping(value="/createOrder")
     @ApiOperation(value = "创建订单接口，返回订单编号",notes = "创建订单")
-    //如使用ApiImplicitParam，那么ApiModel和ApiModelProperty信息不会在swagger-ui上显示
-    //@ApiImplicitParam(name = "orderDto",required = true,value = "订单的json对象，包含订单条目和物流信息")
+        //如使用ApiImplicitParam，那么ApiModel和ApiModelProperty信息不会在swagger-ui上显示
+        //@ApiImplicitParam(name = "orderDto",required = true,value = "订单的json对象，包含订单条目和物流信息")
     @ApiParam(name = "orderDto",required = true,value = "订单的json对象，包含订单条目和物流信息")
     @ApiResponse(code = 200, message = "订单创建成功")
     public ResponseEntity<Long> createOrder(@RequestBody OrderDto orderDto){
@@ -71,6 +73,7 @@ public class OrderController {
     }
 
     @GetMapping(value="testMethod")
+    @AccessLimit( seconds = 17 , maxCount = 3 )
     public void testMethod() throws InterruptedException {
         System.out.println("testMethod");
 
