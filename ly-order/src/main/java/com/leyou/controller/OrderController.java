@@ -2,6 +2,7 @@ package com.leyou.controller;
 
 import com.leyou.auth.pojo.UserInfo;
 import com.leyou.common.annotation.AccessLimit;
+import com.leyou.common.dto.OnSaleStatus;
 import com.leyou.dto.OrderDto;
 import com.leyou.interceptor.UserInterceptor;
 import com.leyou.pojo.Order;
@@ -52,6 +53,15 @@ public class OrderController {
             hystrix: 不超时
 
     */
+
+    @PostMapping(value="/createOnSaleOrder")
+    @ApiOperation(value = "创建订单接口，返回订单编号",notes = "创建订单")
+    @ApiParam(name = "OnSaleStatus",required = true,value = "订单的json对象，包含订单条目和物流信息")
+    @ApiResponse(code = 200, message = "订单创建成功")
+    public void createOnSaleOrder(OnSaleStatus onSaleStatus) {
+        UserInfo user = UserInterceptor.getUserInfo();
+        orderService.createOnSaleOrder(onSaleStatus, user);
+    }
 
     @PostMapping(value="/createOrder")
     @ApiOperation(value = "创建订单接口，返回订单编号",notes = "创建订单")

@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.leyou.auth.pojo.UserInfo;
 import com.leyou.client.GoodsClient;
 import com.leyou.common.dto.CartDto;
+import com.leyou.common.dto.OnSaleStatus;
 import com.leyou.common.enums.ExceptionEnum;
 import com.leyou.common.exception.LyException;
 import com.leyou.common.utils.IdWorker;
@@ -73,6 +74,9 @@ public class OrderServiceImpl implements OrderService {
     @Autowired
     @Qualifier(value="onsale")
     private DefaultRedisScript onsaleLuaDefaultRedisScript;
+
+    @Autowired
+    private OrderAsyncCreater orderAsyncCreater;
 
     private Logger logger = LoggerFactory.getLogger(OrderServiceImpl.class);
 
@@ -230,6 +234,10 @@ public class OrderServiceImpl implements OrderService {
         return orderId;
     }
 
+    public void createOnSaleOrder(OnSaleStatus onSaleStatus, UserInfo user){
+        orderAsyncCreater.createOrderAsync(onSaleStatus,user);
+    }
+
     @Override
     public void testMethod() {
 //        stringRedisTemplate.setEnableTransactionSupport(true);
@@ -327,7 +335,7 @@ public class OrderServiceImpl implements OrderService {
 
 //20201022
 // leyou,cloud2020,react/angualr,netty,big data
-// 限流lua,
+// Done - 限流lua,
 // fallback error,
 // Done - docker redis,
 // Done - 主从／哨兵,
@@ -335,3 +343,4 @@ public class OrderServiceImpl implements OrderService {
 
 //20201030
 //4,9,10,14,15
+//272,273,274,275 - 297

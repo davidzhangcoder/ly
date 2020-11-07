@@ -6,7 +6,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.scripting.support.ResourceScriptSource;
 
-@Configuration(value="LuaForOrder")
+@Configuration(value="LuaForOnOrder")
 public class LuaConfiguration {
 
     @Bean(name="onsale")

@@ -24,6 +24,7 @@
         <module>ly-order</module>
         <module>ly-sleuth</module>
         <module>ly-hystrixdashboard</module>
+        <module>ly-onsale</module>
     </modules>
 
     <parent>

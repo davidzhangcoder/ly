@@ -110,6 +110,14 @@ management:
       exposure:
         include: "*"
 
+threadpool:
+  order:
+    corePoolSize: 15 #IO密集型, 一般公式：CPU核*2
+    maximumPoolSize: 15
+    queueCapacity: 10000 #预计并发
+    keepAliveSeconds: 1
+    enabled: true
+
 leyou:
   jwt:
     pubKeyPath: /Users/davidzhang/Documents/dockerworkspace/rsa/rsa.pub # 公钥地址
