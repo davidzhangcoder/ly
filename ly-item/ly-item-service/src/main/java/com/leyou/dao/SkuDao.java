@@ -18,4 +18,7 @@ public interface SkuDao extends JpaRepository<Sku,Long>, JpaSpecificationExecuto
     //b.stock can not set into Sku here
     //@Query(value="SELECT a.* , b.stock as stock FROM tb_sku a , tb_stock b WHERE a.id in ( :skuIds ) and a.id = b.sku_id" ,nativeQuery=true)
     public List<Sku> getSkusWithStockBySkuIDs(List<Long> skuIds);
+
+    @Query(value="SELECT a.*  FROM tb_sku a WHERE a.id in ( :skuIds )" ,nativeQuery=true)
+    public List<Sku> getOnSaleProduct(List<Long> skuIds);
 }

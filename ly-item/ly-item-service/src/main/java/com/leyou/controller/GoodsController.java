@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
 import java.util.List;
 
 @RequestMapping("/goods")
@@ -24,6 +25,15 @@ public class GoodsController {
 
     @Autowired
     private GoodsServiceHystrix goodsServiceHystrix;
+
+    @GetMapping("getOnSaleProduct")
+    public ResponseEntity<List<Sku>> getOnSaleProduct() {
+        //Test Code
+        List<Long> skuIds = Arrays.asList(10781492357l , 26266538223l);
+
+        List<Sku> onSaleProductList = goodsService.getOnSaleProduct(skuIds);
+        return ResponseEntity.ok(onSaleProductList);
+    }
 
     @GetMapping("getSKUBySPUId")
     public ResponseEntity<List<Sku>> getSKUBySPUId(@RequestParam( name = "spuid" , required = true ) long spuid) {

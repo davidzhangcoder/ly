@@ -27,4 +27,6 @@ public interface GoodsService {
     public void testFallBack(long id);
 
     public long getStockBySkuId(long skuID);
+
+    public List<Sku> getOnSaleProduct(List<Long> skuIds);
 }

@@ -205,6 +205,12 @@ public class GoodsServiceImpl implements GoodsService {
         return stock;
     }
 
+    @Override
+    public List<Sku> getOnSaleProduct(List<Long> skuIds) {
+        List<Sku> onSaleProduct = skuDao.getOnSaleProduct(skuIds);
+        return onSaleProduct;
+    }
+
     private Long getStockbySkuidFromCache(long skuID) {
         String skuKey =RedisKeyConstants.GOODS_STOCK+skuID;
         if (redisTemplate.hasKey(skuKey) ) {

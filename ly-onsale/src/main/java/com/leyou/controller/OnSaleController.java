@@ -1,5 +1,6 @@
 package com.leyou.controller;
 
+import com.leyou.auth.pojo.UserInfo;
 import com.leyou.common.annotation.AccessLimit;
 import com.leyou.service.OnSaleService;
 import io.swagger.annotations.Api;
@@ -9,8 +10,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.util.concurrent.TimeUnit;
 
 @RequestMapping("/onsale")
@@ -27,17 +31,20 @@ public class OnSaleController {
         //@ApiImplicitParam(name = "orderDto",required = true,value = "订单的json对象，包含订单条目和物流信息")
     //@ApiParam(name = "onSaleProductID",required = true,value = "秒杀商品ID")
     @ApiResponse(code = 200, message = "秒杀订单创建成功")
-    public ResponseEntity<Long> snapUpOrder(/*@RequestParam long onSaleProductID*/){
+    public ResponseEntity<Long> snapUpOrder(@RequestParam long onSaleProductID,
+        HttpServletRequest request){
+        long userID = 1;
 
-        onSaleService.snapUpOrder(1);
+        HttpSession session = request.getSession();
+        onSaleService.snapUpOrder(onSaleProductID, userID);
 
         return ResponseEntity.ok(1L);
     }
 
     @GetMapping(value="testMethod")
-    public void testMethod() throws InterruptedException {
+    public String testMethod() throws InterruptedException {
         System.out.println("testMethod");
-
+        return "testMethod";
     }
 
 

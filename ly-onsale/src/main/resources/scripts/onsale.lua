@@ -13,7 +13,7 @@ then
 end
 
 --no stock setup
-if( stock == false )
+if( stock == false or stock == nil )
 then
 	return 3;--'stock is not configured'
 end

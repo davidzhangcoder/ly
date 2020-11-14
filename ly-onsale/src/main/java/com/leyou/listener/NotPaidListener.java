@@ -4,8 +4,10 @@ import com.leyou.common.dto.OnSaleStatus;
 import com.leyou.common.utils.RedisKeyConstants;
 import com.leyou.configuration.RabbitMQConfiguration;
 
+import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.utils.SerializationUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -16,7 +18,7 @@ import java.util.Date;
 import java.util.Map;
 
 @Component
-@RabbitListener(queues = RabbitMQConfiguration.QUEUE_NOT_PAID)
+//@RabbitListener(queues = RabbitMQConfiguration.QUEUE_NOT_PAID)
 public class NotPaidListener {
 
     @Autowired
@@ -26,9 +28,9 @@ public class NotPaidListener {
      * 监听消息
      * @param msg
      */
-    @RabbitHandler
-    public void msg(@Payload Object msg){
-        Map<String,String> messageMap = (Map) msg;
+//    @RabbitHandler
+    public void msg(@Payload Message msg){
+        Map<String,String> messageMap = (Map<String, String>) SerializationUtils.deserialize(msg.getBody());
         String onSaleProductID = messageMap.get("onSaleProductID");
         String userID = messageMap.get("userID");
         String sentTime = messageMap.get("sentTime");

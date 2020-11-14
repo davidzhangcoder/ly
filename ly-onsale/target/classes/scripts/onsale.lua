@@ -13,7 +13,7 @@ then
 end
 
 --no stock setup
-if( stock == false )
+if( stock == false or stock == nil )
 then
 	return 3;--'stock is not configured'
 end
@@ -24,6 +24,7 @@ then
 end
 
 redis.call("sadd",userlistKey,userid);
+redis.call("expire",userlistKey,24*60*60);
 
 redis.call("decr",stockKey);
 

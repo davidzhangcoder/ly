@@ -8,7 +8,10 @@ import com.leyou.common.utils.RedisKeyConstants;
 import com.leyou.configuration.RabbitMQConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.core.AmqpTemplate;
+import org.springframework.amqp.core.Message;
+import org.springframework.amqp.core.MessagePostProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataAccessException;
@@ -45,7 +48,7 @@ public class OnSaleAsyncCreater {
 
     @Async(value="onSaleThreadPool_OnSaleService")
     public void snapUpOrder(long onSaleProductID, long userID, String hashTag){
-        logger.info("Processing onSaleProductID={}, Thread Name = {}" ,
+        logger.warn("Processing onSaleProductID={}, Thread Name = {}" ,
                 onSaleProductID, Thread.currentThread().getName());
         //todo
         //1.帐号是否正常 － 在Service中处理
@@ -57,11 +60,17 @@ public class OnSaleAsyncCreater {
         //6.恶意抢单
         //7.抢单 - lua
 
+        //todo
+        //1.Redis中的和workfow有关Key的过期时间是否应和Tomcat中的Session过期时间相同
+        //2.logout时手动删除
+
         //3.是否存在未支付秒杀订单
-        //Set_Order_for_user:{user_id} (expire:24hours,加入order时，检查是否有Order过期，并手动Remove)-> Value_Object_OrderCacheDTO_On_OrderUniqueID:'uniqueid'
+        //Set_Order_for_user:{user_id} (expire:<Redis中的和workfow有关Key的过期时间是否应和Tomcat中的Session过期时间相同,logout时手动删除>,加入order时，检查是否有Order过期，并手动Remove)
+            // -> Value_Object_OrderCacheDTO_On_OrderUniqueID:'uniqueid'
             // 通过过期监听实现expire (经过研究后发现，过期监听会有delay,不能很精准的触发)
-        //Value_Object_OrderCacheDTO_On_OrderUniqueID:'uniqueid' (expire:24hours)-> OrderCacheDTO object which include priductid and status
-            // 在set value时同时设置expire
+        //Value_Object_OrderCacheDTO_On_OrderUniqueID:'uniqueid' (expire:<Redis中的和workfow有关Key的过期时间是否应和Tomcat中的Session过期时间相同,logout时手动删除>)
+            // -> OrderCacheDTO object which include priductid and status
+            // 在set value时同时设置expire <Redis中的和workfow有关Key的过期时间是否应和Tomcat中的Session过期时间相同,logout时手动删除>
 
         //库存
         //2-1.同一用户不能购买多次
@@ -139,7 +148,7 @@ public class OnSaleAsyncCreater {
                 orderDtoCache.setNum(1);
                 orderDtoCache.setCreateDate(onSaleStatus.getCreateTime());
 
-                String orderDtoCacheKey = RedisKeyConstants.VALUE_OBJECT_ORDERCACHEDTO_ON_ORDERUNIQUEID + "onSaleStatus.getUniqueID()";
+                String orderDtoCacheKey = RedisKeyConstants.VALUE_OBJECT_ORDERCACHEDTO_ON_ORDERUNIQUEID + onSaleStatus.getUniqueID();
                 redisTemplate.boundValueOps(orderDtoCacheKey).set(orderDtoCache,1, TimeUnit.DAYS);
                 redisTemplate.boundSetOps(RedisKeyConstants.SET_ORDER_FOR_USER).add(orderDtoCacheKey);
 
@@ -154,9 +163,18 @@ public class OnSaleAsyncCreater {
                 map.put("sentTime",currentTime);
                 map.put("hashTag",hashTag);
 
-                amqpTemplate.convertAndSend(rabbitMQConfiguration.DLX_EXCHANGE,
-                        rabbitMQConfiguration.QUEUE_PAYMENT_DELAY,
-                        map);
+//                amqpTemplate.convertAndSend(rabbitMQConfiguration.DLX_EXCHANGE,
+//                        rabbitMQConfiguration.QUEUE_PAYMENT_DELAY,
+//                        map);
+
+                amqpTemplate.convertAndSend(rabbitMQConfiguration.QUEUE_PAYMENT_DELAY, map, new MessagePostProcessor() {
+                    @Override
+                    public Message postProcessMessage(Message message) throws AmqpException {
+                        message.getMessageProperties().setExpiration("10000");
+                        return message;
+                    }
+                });
+
 
                 return;
             } else if (result == 2) {

@@ -27,8 +27,7 @@ public class OnSaleServiceImpl implements OnSaleService {
     private RedisTemplate redisTemplate;
 
     @Override
-    public long snapUpOrder(long onSaleProductID) {
-        long userID = 1;
+    public long snapUpOrder(long onSaleProductID , long userID ) {
         IdWorker idWorker = new IdWorker();
         long uniqueID = idWorker.nextId();
 

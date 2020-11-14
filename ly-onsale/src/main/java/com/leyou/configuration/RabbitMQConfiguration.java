@@ -62,7 +62,7 @@ public class RabbitMQConfiguration {
     }
 
     @Bean( name = "leyouOnSaleRabbitTemplate" )
-    public RabbitTemplate leyouSMSRabbitTemplate(ConnectionFactory connectionFactory){
+    public RabbitTemplate leyouOnSaleRabbitTemplate(ConnectionFactory connectionFactory){
         RabbitTemplate leyouSMSRabbitTemplate = new RabbitTemplate(connectionFactory);
         return leyouSMSRabbitTemplate;
     }

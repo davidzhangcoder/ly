@@ -13,6 +13,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -84,7 +86,7 @@ public class OrderController {
 
     @GetMapping(value="testMethod")
     @AccessLimit( seconds = 17 , maxCount = 3 )
-    public void testMethod() throws InterruptedException {
+    public void testMethod(HttpServletRequest request) throws InterruptedException {
         System.out.println("testMethod");
 
         System.out.println(successCreated.get() + " failCreated: " + failCreated.get());
@@ -93,6 +95,9 @@ public class OrderController {
 
         TimeUnit.SECONDS.sleep(1);
 
+        HttpSession session = request.getSession();
+        session.setAttribute("test", "testRedisHttpSession");
+        System.out.println(session.getAttribute("test"));
         //orderService.testMethod();
     }
 
