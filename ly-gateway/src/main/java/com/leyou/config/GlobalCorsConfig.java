@@ -17,6 +17,7 @@ public class GlobalCorsConfig {
         //config.addAllowedOrigin("*");
         config.addAllowedOrigin("http://manage.leyou.com");
         config.addAllowedOrigin("http://www.leyou.com");
+        config.addAllowedOrigin("http://127.0.0.1:3000");
 
         //2) 是否发送Cookie信息
         config.setAllowCredentials(true);

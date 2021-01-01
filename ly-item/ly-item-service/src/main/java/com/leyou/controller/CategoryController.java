@@ -1,16 +1,12 @@
 package com.leyou.controller;
 
 import com.leyou.common.vo.PageResult;
-import com.leyou.domain.Brand;
 import com.leyou.domain.Category;
 import com.leyou.service.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -54,6 +50,28 @@ public class CategoryController {
             @RequestParam( name = "ids" , required = true ) List<Long> ids ) {
         List<Category> resultList = categoryService.getCategoryByCategoryIds(ids);
         return ResponseEntity.ok( resultList );
+    }
+
+    @GetMapping("getCategoriesByPage")
+    public ResponseEntity<PageResult<Category>> getCategoriesByPage(
+            @RequestParam( name = "key" , required = true ) String key,
+            @RequestParam( name = "descending" , required = true ) boolean descending,
+            @RequestParam( name = "page" , required = true ) int page,
+            @RequestParam( name = "rowsPerPage" , required = true ) int rowsPerPage,
+            @RequestParam( name = "sortBy" , required = true ) String sortBy,
+            @RequestParam( name = "parentID" , required = true ) long parentID
+    ) {
+        return ResponseEntity.ok(categoryService.searchCategory(key, descending, page, rowsPerPage, sortBy, parentID));
+    }
+
+    @GetMapping("getCategoriesByParentID")
+    public ResponseEntity<List<Category>> getCategoriesByParentID(@RequestParam( name = "parentID" , required = true ) long parentID) {
+        return ResponseEntity.ok(categoryService.getCategoriesByParentID(parentID));
+    }
+
+    @RequestMapping(value = "persistCategory" , method = { RequestMethod.POST } )
+    public ResponseEntity<Category> persistBrand(@RequestBody Category category) {
+        return ResponseEntity.ok( categoryService.persistCategory(category) );
     }
 
 }

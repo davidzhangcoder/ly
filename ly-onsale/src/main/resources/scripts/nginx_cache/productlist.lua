@@ -44,3 +44,6 @@ else
     ngx.say("not found");
 end
 
+--json, template, lock, JVM Cahce (Spring Cache)
+--元表，对象，变量的共享范围
+
