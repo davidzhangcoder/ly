@@ -15,6 +15,13 @@ import java.nio.charset.Charset;
 
 @Component
 public class ApiFallbackProvider implements FallbackProvider {
+
+//    1.
+//    Zuul提供了借口FallbackProvider来提供fallback处理
+//
+//    2.
+//    Zulu的fallback容错处理逻辑，只针对timeout异常处理，当请求被Zuul路由后,只要服务有返回(包括异常)，都不会触发Zuul的fallback容错逻辑
+
     @Override
     //该Provider应用的Route ID，例如：testservice，如果设置为 * ，那就对所有路由生效
     public String getRoute() {

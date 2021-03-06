@@ -16,8 +16,20 @@ spring:
       # 配置采样比例，生产环境应调小，否则影响系统执行效率，或者改为rabbitMq方式
       # 一般用0.5
       probability: 1.0
+#  redis:
+#    enabled: false
   redis:
-    enabled: false
+    #host: 192.168.1.10 #这个是配单机版
+    enabled: true
+    cluster:
+      nodes: 192.168.1.10:6379, 192.168.1.10:6380, 192.168.1.10:6381, 192.168.1.10:6389, 192.168.1.10:6390, 192.168.1.10:6391
+      max-redirects: 5
+    jedis:
+      pool:
+        max-active: 10 # 连接池最大连接数（使用负值表示没有限制）
+        max-idle: 5 # 连接池中的最大空闲连接
+        max-wait: 1000 # 连接池最大阻塞等待时间（使用负值表示没有限制）
+        min-idle: 5 # 连接池中的最小空闲连接
   redisson:
     enabled: false
 
@@ -31,13 +43,43 @@ eureka:
 #    ip-address: 127.0.0.1
 #    instance-id: ${spring.application.name}:${server.port}
 
+#  关于Zuul的限流
+#  用了origin在redis的key中会有ip地址（配了origin,url,user）
+#   用：api-gateway:item-service:192.168.1.10:/goods/getOnSaleProduct:anonymous
+#   不用： api-gateway:item-service:/goods/getOnSaleProduct:anonymous
+#  用了user在redis的key中会有user name - 如anonymous (配了url,user)
+#   用: api-gateway:item-service:/goods/getOnSaleProduct:anonymous
+#   不用： api-gateway:item-service:/goods/getOnSaleProduct
 zuul:
+  ratelimit:
+    enabled: true
+    repository: REDIS
+    default-policy-list: #全局限流
+      - limit: 10 #optional - request number limit per refresh interval window
+        refresh-interval: 60 #default value (in seconds) ＃60秒内超过 limit 次就限流
+        type: #optional
+          #- origin #origin是根据IP限流
+          - url
+#          - user
+#    policy-list: #局部限流
+#      order-service:
+#        - limit: 5 #optional - request number limit per refresh interval window
+#          #quota: 1000 #optional - request time limit per refresh interval window (in seconds)
+#          refresh-interval: 60 #default value (in seconds)
+#          type: #optional
+#            - origin
+#            - url
+#            - user
+  SendErrorFilter: # 对于自定义error filter，先要禁用Zuul默认的异常处理Filter
+    error:
+      disabled: true
+
   prefix: /api # 添加路由前缀 retryable: true
   add-host-header: true #携带请求本身的head信息
   sensitive-headers:  #敏感头过滤, 配置禁止使用的头信息，这里设置为null,否则set-cookie无效
   routes:
     item-service:
-      path: /item-service/**
+      path: /item-service/** # /*不匹配子路径（匹配/item-service/a /item-service/b）, /**不匹配子路径（匹配/item-service/a/a /item-service/b/b）
       #url: http://127.0.0.1:8081
       serviceId: item-service
     upload-service:

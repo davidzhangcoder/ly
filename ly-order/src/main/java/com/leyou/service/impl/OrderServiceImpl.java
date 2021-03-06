@@ -102,6 +102,10 @@ public class OrderServiceImpl implements OrderService {
 
         //{"paymentType":1,"carts":[{"skuId":10781492357,"num":6}],"addressId":1}
 
+        //test
+//        if(true)
+//            throw new Exception("测试throw错误，进入Zuul的ApiFallbackProvider");
+
         long enterTime = System.currentTimeMillis();
         //logger.warn("start={} , enterTime={}, diff={}", start, enterTime, (enterTime-start) );
 

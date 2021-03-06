@@ -51,6 +51,20 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
+        <!--    Zuul限流    -->
+        <dependency>
+            <groupId>com.marcosbarbero.cloud</groupId>
+            <artifactId>spring-cloud-zuul-ratelimit</artifactId>
+            <version>2.3.0.RELEASE</version>
+        </dependency>
+
+        <!--    已在ly-common中引入    -->
+        <!--        <dependency>-->
+        <!--            <groupId>org.springframework.boot</groupId>-->
+        <!--            <artifactId>spring-boot-starter-data-redis</artifactId>-->
+        <!--        </dependency>-->
+        <!--    Zuul限流    -->
+
     </dependencies>
 
 </project>

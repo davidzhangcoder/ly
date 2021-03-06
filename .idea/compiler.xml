@@ -19,12 +19,12 @@
         <module name="ly-transactionbymessage" />
         <module name="ly-hystrixdashboard" />
         <module name="ly-cart" />
+        <module name="ly-sms" />
         <module name="ly-sleuth" />
         <module name="ly-gateway" />
         <module name="ly-page" />
-        <module name="ly-onsale" />
         <module name="ly-item-service" />
-        <module name="ly-sms" />
+        <module name="ly-onsale" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>

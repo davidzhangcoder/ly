@@ -71,15 +71,18 @@ public class OrderController {
         //@ApiImplicitParam(name = "orderDto",required = true,value = "订单的json对象，包含订单条目和物流信息")
     @ApiParam(name = "orderDto",required = true,value = "订单的json对象，包含订单条目和物流信息")
     @ApiResponse(code = 200, message = "订单创建成功")
-    public ResponseEntity<Long> createOrder(@RequestBody OrderDto orderDto){
+    public ResponseEntity<Long> createOrder(@RequestBody OrderDto orderDto) throws Exception {
         //创建订单
         UserInfo user = UserInterceptor.getUserInfo();
         Long orderId = null;
-        try {
+
+//        try {
+
             orderId = orderService.createOrder(orderDto,user);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).body(-1l);
-        }
+
+//        } catch (Exception e) {
+//            return ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).body(-1l);
+//        }
 
         return ResponseEntity.ok(orderId);
     }
