@@ -121,7 +121,7 @@ public class AuthorizationServer extends AuthorizationServerConfigurerAdapter {
     @Override
     public void configure(AuthorizationServerEndpointsConfigurer endpoints) {
         endpoints
-                .authenticationManager(authenticationManager)
+                .authenticationManager(authenticationManager) //认证管理器
                 .authorizationCodeServices(authorizationCodeServices)
                 .tokenServices(tokenService())
                 .allowedTokenEndpointRequestMethods(HttpMethod.POST)

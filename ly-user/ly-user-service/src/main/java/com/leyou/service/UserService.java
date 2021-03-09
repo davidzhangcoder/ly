@@ -10,4 +10,11 @@ public interface UserService {
     public void register(User user, String code);
 
     public User query(String username, String password);
+
+
+    public User queryForOAuth2(String username, String password);
+
+    public User findUserByUsernameForOAuth2(String username);
+
+    public void registerForOAuth2(User user);
 }

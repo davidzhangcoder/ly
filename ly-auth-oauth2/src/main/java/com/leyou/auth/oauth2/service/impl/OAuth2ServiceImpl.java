@@ -39,7 +39,7 @@ public class OAuth2ServiceImpl implements OAuth2Service {
     @Override
     public AuthToken authorize(String username, String password, String clientId , String clientSecret, String grantType) {
 
-        User user = userClient.query(username, password);
+        User user = userClient.queryForOAuth2(username, password);
 
         if (user == null) {
             throw new LyException(ExceptionEnum.USER_PASSWORD_NOT_MATCH);

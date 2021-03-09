@@ -22,7 +22,6 @@ public class User {
     private String username;// 用户名
 
     @Column(name = "password")
-    @JsonIgnore
     private String password;// 密码
 
     @Column(name = "phone")

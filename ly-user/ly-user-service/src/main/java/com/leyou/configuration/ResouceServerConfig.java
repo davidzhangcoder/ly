@@ -33,6 +33,9 @@ public class ResouceServerConfig extends ResourceServerConfigurerAdapter {
         http
                 .authorizeRequests()
                 .antMatchers("/user/query").permitAll()
+                .antMatchers("/user/queryForOAuth2").permitAll()
+                .antMatchers("/user/registerForOAuth2").permitAll()
+                .antMatchers("/user/findUserByUsernameForOAuth2").permitAll()
                 .antMatchers("/**").access("#oauth2.hasScope('ROLE_API')")
                 .anyRequest().authenticated()
                 .and().csrf().disable()

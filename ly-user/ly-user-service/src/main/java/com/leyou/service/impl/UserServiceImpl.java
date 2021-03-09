@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Example;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -154,5 +155,60 @@ public class UserServiceImpl implements UserService {
         }
 
         return user;
+    }
+
+    @Override
+    public User queryForOAuth2(String username, String password) {
+        if(StringUtils.isEmpty(username)||StringUtils.isEmpty(password)) {
+            logger.info("[用户服务 － query] : 参数错误");
+            throw new LyException(ExceptionEnum.INVALID_PARAMETER);
+        }
+
+        User user = new User();
+        user.setUsername(username);
+        Example<User> example = Example.of(user);
+        Optional<User> userOptional = userDao.findOne(example);
+
+        if (!userOptional.isPresent()) {
+            logger.info("[用户服务 － query] : 用户不存在");
+            return null;
+        }
+
+        user = userOptional.get();
+
+        if(!BCrypt.checkpw(password,user.getPassword())) {
+            logger.info("[用户服务 － query] : 密码错误");
+            return null;
+        }
+
+        return user;
+    }
+
+    @Override
+    public User findUserByUsernameForOAuth2(String username){
+        if(StringUtils.isEmpty(username)) {
+            logger.info("[用户服务 － query] : 参数错误");
+            throw new LyException(ExceptionEnum.INVALID_PARAMETER);
+        }
+
+        User userByUsername = userDao.findUserByUsername(username);
+        return userByUsername;
+    }
+
+    public void registerForOAuth2(User user){
+        String username = user.getUsername();
+
+        if( !check(username, CheckType.USERNAME.getId()) ) {
+            throw new LyException(ExceptionEnum.USER_ALREADY_EXIST);
+        }
+
+        String salt = CodecUtils.generateSalt();
+        String encodedPassWord = BCrypt.hashpw(user.getPassword(), BCrypt.gensalt());
+        user.setPassword(encodedPassWord);
+        user.setSalt(salt);
+
+        user.setCreated(Calendar.getInstance().getTime());
+        userDao.save(user);
+
     }
 }

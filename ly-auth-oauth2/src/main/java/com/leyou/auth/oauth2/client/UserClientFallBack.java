@@ -9,6 +9,16 @@ public class UserClientFallBack implements UserClient{
     }
 
     @Override
+    public User queryForOAuth2(String username, String password) {
+        return null;
+    }
+
+    @Override
+    public User findUserByUsernameForOAuth2(String username) {
+        return null;
+    }
+
+    @Override
     public String seataUpdateAccount2(long amount) {
         return null;
     }

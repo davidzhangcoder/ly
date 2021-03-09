@@ -41,6 +41,15 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
+    @GetMapping( value = "queryForOAuth2" )
+    public ResponseEntity<User> queryForOAuth2(@RequestParam String username , @RequestParam String password ) {
+        User user = userService.queryForOAuth2(username, password);
+        if (user == null) {
+            throw new LyException(ExceptionEnum.USER_PASSWORD_NOT_MATCH);
+        }
+        return ResponseEntity.ok( user );
+    }
+
     @GetMapping( value = "query" )
     public ResponseEntity<User> query(@RequestParam String username , @RequestParam String password ) {
         User user = userService.query(username, password);
@@ -49,6 +58,22 @@ public class UserController {
         }
         return ResponseEntity.ok( user );
     }
+
+    @GetMapping( value = "findUserByUsernameForOAuth2" )
+    public ResponseEntity<User> findUserByUsernameForOAuth2(@RequestParam String username ) {
+        User user = userService.findUserByUsernameForOAuth2(username);
+        return ResponseEntity.ok( user );
+    }
+
+    @PostMapping( value = "registerForOAuth2" )
+    public ResponseEntity<Void> registerForOAuth2( User user ) {
+        userService.registerForOAuth2( user );
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+
+
+
 
     @GetMapping( value = "seataUpdateAccount2" )
     public String seataUpdateAccount2(@RequestParam long amount){
