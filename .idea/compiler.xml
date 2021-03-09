@@ -23,6 +23,7 @@
         <module name="ly-sleuth" />
         <module name="ly-gateway" />
         <module name="ly-page" />
+        <module name="ly-auth-oauth2" />
         <module name="ly-item-service" />
         <module name="ly-onsale" />
       </profile>
@@ -36,6 +37,7 @@
       <module name="leyou" options="-parameters" />
       <module name="ly-auth" options="-parameters" />
       <module name="ly-auth-common" options="-parameters" />
+      <module name="ly-auth-oauth2" options="-parameters" />
       <module name="ly-auth-service" options="-parameters" />
       <module name="ly-cart" options="-parameters" />
       <module name="ly-common" options="-parameters" />

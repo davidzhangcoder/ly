@@ -65,11 +65,11 @@
             <artifactId>spring-boot-starter-test</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>com.leyou.service</groupId>
-            <artifactId>ly-transactionbymessage</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.leyou.service</groupId>-->
+<!--            <artifactId>ly-transactionbymessage</artifactId>-->
+<!--            <version>1.0.0-SNAPSHOT</version>-->
+<!--        </dependency>-->
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -114,6 +114,23 @@
             <groupId>io.seata</groupId>
             <artifactId>seata-all</artifactId>
             <version>0.9.0</version>
+        </dependency>
+
+        <!--    Spring Security OAuth2    -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-security</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-oauth2</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.leyou.service</groupId>
+            <artifactId>ly-auth-common</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
         </dependency>
 
     </dependencies>

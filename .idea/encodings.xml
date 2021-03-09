@@ -3,6 +3,7 @@
   <component name="Encoding">
     <file url="file://$PROJECT_DIR$" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/ly-auth" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/ly-auth-oauth2" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/ly-auth/ly-auth-common" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/ly-auth/ly-auth-service" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/ly-cart" charset="UTF-8" />
@@ -13,12 +14,9 @@
     <file url="file://$PROJECT_DIR$/ly-item/ly-item-interface" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/ly-item/ly-item-service" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/ly-onsale" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/ly-onsale" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/ly-onsale" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/ly-order" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/ly-page" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/ly-registry" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/ly-sale" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/ly-search" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/ly-sleuth" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/ly-sms" charset="UTF-8" />

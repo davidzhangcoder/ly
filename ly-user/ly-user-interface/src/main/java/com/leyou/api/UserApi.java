@@ -15,4 +15,7 @@ public interface UserApi {
     @GetMapping( value = "seataUpdateAccount2" )
     public String seataUpdateAccount2(@RequestParam long amount);
 
+    @GetMapping( value = "testUser" )
+    public String testUser();
+
 }

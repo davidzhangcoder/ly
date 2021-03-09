@@ -110,6 +110,10 @@ zuul:
       path: /order/**
       serviceId: order-service #eureka中的微服务serviceId
       strip-prefix: false
+    auth-oauth2-service:
+      path: /uaa/**
+      serviceId: auth-oauth2-service #eureka中的微服务serviceId
+      strip-prefix: false
   host:
     max-total-connections: 2000 #http客户端连接池最大连接，默认是200， （ HttpClient 总连接数 ）
     max-per-route-connections: 500 #每个route可用的最大连接数，默认值是20 （ HttpClient 单个服务（即服务发现中的每个服务）连接数 ）
@@ -189,6 +193,7 @@ leyou:
       - /api/user/query
       - /api/item-service
       - /api/page
+      - /api/uaa/oauth2/login
 
 
 

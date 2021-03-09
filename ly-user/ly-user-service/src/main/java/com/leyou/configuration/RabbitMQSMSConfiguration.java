@@ -1,6 +1,6 @@
 package com.leyou.configuration;
 
-import com.leyou.service.impl.ConfirmCallBack;
+//import com.leyou.service.impl.ConfirmCallBack;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.boot.context.properties.ConfigurationProperties;
