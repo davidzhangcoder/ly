@@ -1,5 +1,6 @@
 package com.leyou.configuration;
 
+import com.leyou.configuration.permission.MyFilterSecurityInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -9,6 +10,7 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.E
 import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
 import org.springframework.security.oauth2.provider.token.TokenStore;
+import org.springframework.security.web.access.intercept.FilterSecurityInterceptor;
 
 @Configuration
 @EnableResourceServer
@@ -19,6 +21,10 @@ public class ResouceServerConfig extends ResourceServerConfigurerAdapter {
 
     @Autowired
     TokenStore tokenStore;
+
+    @Autowired
+    private MyFilterSecurityInterceptor myFilterSecurityInterceptor;
+
 
     @Override
     public void configure(ResourceServerSecurityConfigurer resources) {
@@ -40,6 +46,8 @@ public class ResouceServerConfig extends ResourceServerConfigurerAdapter {
                 .anyRequest().authenticated()
                 .and().csrf().disable()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+
+        http.addFilterBefore(myFilterSecurityInterceptor, FilterSecurityInterceptor.class);
 
         //.antMatchers("/**").access("#oauth2.hasScope('ROLE_API')")
     }
