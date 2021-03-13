@@ -19,10 +19,10 @@ spring:
 #  redis:
 #    enabled: false
   redis:
-    #host: 192.168.1.10 #这个是配单机版
+    #host: 192.168.1.3 #这个是配单机版
     enabled: true
     cluster:
-      nodes: 192.168.1.10:6379, 192.168.1.10:6380, 192.168.1.10:6381, 192.168.1.10:6389, 192.168.1.10:6390, 192.168.1.10:6391
+      nodes: 192.168.1.3:6379, 192.168.1.3:6380, 192.168.1.3:6381, 192.168.1.3:6389, 192.168.1.3:6390, 192.168.1.3:6391
       max-redirects: 5
     jedis:
       pool:
@@ -45,7 +45,7 @@ eureka:
 
 #  关于Zuul的限流
 #  用了origin在redis的key中会有ip地址（配了origin,url,user）
-#   用：api-gateway:item-service:192.168.1.10:/goods/getOnSaleProduct:anonymous
+#   用：api-gateway:item-service:192.168.1.3:/goods/getOnSaleProduct:anonymous
 #   不用： api-gateway:item-service:/goods/getOnSaleProduct:anonymous
 #  用了user在redis的key中会有user name - 如anonymous (配了url,user)
 #   用: api-gateway:item-service:/goods/getOnSaleProduct:anonymous

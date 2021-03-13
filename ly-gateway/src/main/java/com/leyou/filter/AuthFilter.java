@@ -13,6 +13,7 @@ import org.springframework.cloud.netflix.zuul.filters.support.FilterConstants;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -26,6 +27,9 @@ public class AuthFilter extends ZuulFilter {
 
     @Autowired
     private FilterProperties filterProperties;
+
+    //令牌头名字
+    private static final String AUTHORIZE_TOKEN = "Authorization";
 
     @Override
     public String filterType() {
@@ -63,20 +67,32 @@ public class AuthFilter extends ZuulFilter {
 
         HttpServletRequest request = ctx.getRequest();
 
-        Cookie cookie = Arrays.stream(request.getCookies())
-                .filter(x -> x.getName().equalsIgnoreCase(jwtConfiguration.getCookieName()))
-                .findFirst().orElse(null);
+        String jwt = request.getHeader(AUTHORIZE_TOKEN);
+
+        if(StringUtils.isEmpty(jwt) && request.getCookies()!=null) {
+            Cookie cookie = Arrays.stream(request.getCookies())
+                    .filter(x -> x.getName().equalsIgnoreCase(jwtConfiguration.getCookieName()))
+                    .findFirst().orElse(null);
+
+            jwt = cookie.getValue();
+        }
 
         boolean stop = false;
-        if(cookie==null) {
-            stop = true;
-        }
+        if( !StringUtils.isEmpty(jwt) ) {
+            try {
+                String jwtValue = jwt;
+                if ( jwtValue.startsWith("bearer ") )
+                    jwtValue = jwtValue.replaceFirst("bearer ","");
 
-        try {
-            JwtUtils.getInfoFromToken(cookie.getValue(), jwtConfiguration.getPublicKey());
-        } catch (Exception e) {
+                if ( jwtValue.startsWith("Bearer ") )
+                    jwtValue = jwtValue.replaceFirst("Bearer ","");
+
+                JwtUtils.getInfoFromToken(jwtValue, jwtConfiguration.getPublicKey());
+            } catch (Exception e) {
+                stop = true;
+            }
+        }else
             stop = true;
-        }
 
         //TODO: 权限管理
 
@@ -86,17 +102,16 @@ public class AuthFilter extends ZuulFilter {
             ctx.setSendZuulResponse(false);
             //返回状态码
             ctx.setResponseStatusCode(HttpStatus.FORBIDDEN.value());
+            return null;
         }
 
-        String token = cookie.getValue();
+        String token = jwt;
 
         if (!token.startsWith("bearer ") && !token.startsWith("Bearer ")) {
-
             //拼接token
             token = "bearer " + token;
 
         }
-
 
         ctx.addZuulRequestHeader("Authorization", token);
 
