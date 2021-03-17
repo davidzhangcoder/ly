@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.jwt.crypto.sign.RsaSigner;
 import org.springframework.security.jwt.crypto.sign.RsaVerifier;
+import org.springframework.security.oauth2.provider.token.DefaultAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
@@ -21,6 +22,9 @@ public class TokenConfig {
     @Autowired
     private JwtConfiguration jwtConfiguration;
 
+    @Autowired
+    private CustomUserAuthenticationConverter customUserAuthenticationConverter;
+
     @Bean
     public TokenStore tokenStore() {
         //JWT令牌存储方案
@@ -36,6 +40,10 @@ public class TokenConfig {
 
         RSAPublicKey publicKey = (RSAPublicKey) jwtConfiguration.getPublicKey();
         converter.setVerifier(new RsaVerifier(publicKey));
+
+        //配置自定义的CustomUserAuthenticationConverter
+        DefaultAccessTokenConverter accessTokenConverter = (DefaultAccessTokenConverter) converter.getAccessTokenConverter();
+        accessTokenConverter.setUserTokenConverter(customUserAuthenticationConverter);
 
 //        converter.setSigningKey(SIGNING_KEY); //对称秘钥，资源服务器使用该秘钥来验证
         return converter;

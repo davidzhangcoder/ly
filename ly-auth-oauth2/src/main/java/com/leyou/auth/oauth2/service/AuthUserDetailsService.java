@@ -2,6 +2,7 @@ package com.leyou.auth.oauth2.service;
 
 
 import com.leyou.auth.oauth2.client.UserClient;
+import com.leyou.auth.oauth2.utils.UserJwt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.security.core.authority.AuthorityUtils;
@@ -11,7 +12,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-//@Primary
+@Primary
 @Service
 public class AuthUserDetailsService implements UserDetailsService {
 
@@ -39,7 +40,7 @@ public class AuthUserDetailsService implements UserDetailsService {
         String pwd = user.getPassword();
 
         if("admin".equals(username)) {
-            return new User(username, pwd, AuthorityUtils.commaSeparatedStringToAuthorityList("admin,ROLE_managerrole,p1,ROLE_P1"));
+            return new UserJwt( user.getId(), username, pwd, AuthorityUtils.commaSeparatedStringToAuthorityList("admin,ROLE_managerrole,p1,ROLE_P1"));
 
 //            User curUser = new User(username, pwd);
 //            SecurityUser securityUser = new SecurityUser(curUser);
@@ -51,7 +52,7 @@ public class AuthUserDetailsService implements UserDetailsService {
 //            return securityUser;
         }
         else {
-            return new User(username, pwd, AuthorityUtils.commaSeparatedStringToAuthorityList("sales,testUserPermission"));
+            return new UserJwt( user.getId(), username, pwd, AuthorityUtils.commaSeparatedStringToAuthorityList("sales,testUserPermission"));
 
 //            User curUser = new User(username, pwd);
 //            SecurityUser securityUser = new SecurityUser(curUser);

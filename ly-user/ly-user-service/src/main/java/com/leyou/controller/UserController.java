@@ -1,17 +1,28 @@
 package com.leyou.controller;
 
+import com.leyou.auth.utils.JwtUtils;
 import com.leyou.common.enums.ExceptionEnum;
 import com.leyou.common.exception.LyException;
+import com.leyou.domain.Permission;
 import com.leyou.domain.User;
 import com.leyou.seata.TestSeataService;
 import com.leyou.service.UserService;
+import com.leyou.service.impl.UserServiceImpl;
+import com.leyou.utils.TokenDecodeUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationDetails;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Collections;
+import java.util.List;
 
 @RestController
 @RequestMapping("/user")
@@ -22,6 +33,11 @@ public class UserController {
 
     @Autowired
     private TestSeataService testSeataService;
+
+    @Autowired
+    private TokenDecodeUtil tokenDecodeUtil;
+
+    private Logger logger = LoggerFactory.getLogger(UserController.class);
 
     @GetMapping( value = "check/{data}/{type}" )
     public ResponseEntity<Boolean> check(@PathVariable("data") String data,
@@ -69,6 +85,19 @@ public class UserController {
     public ResponseEntity<Void> registerForOAuth2( User user ) {
         userService.registerForOAuth2( user );
         return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @GetMapping( value = "getUserPermissions" )
+    public List<Permission> getUserPermissions() {
+        long userId = 0;
+        try {
+            userId = tokenDecodeUtil.getUserId();
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.error(e.getMessage());
+            return Collections.emptyList();
+        }
+        return userService.getUserPermissions(userId);
     }
 
 

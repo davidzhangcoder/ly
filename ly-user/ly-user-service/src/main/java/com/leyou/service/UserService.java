@@ -1,6 +1,9 @@
 package com.leyou.service;
 
+import com.leyou.domain.Permission;
 import com.leyou.domain.User;
+
+import java.util.List;
 
 public interface UserService {
     public Boolean check(String data, Long type);
@@ -17,4 +20,6 @@ public interface UserService {
     public User findUserByUsernameForOAuth2(String username);
 
     public void registerForOAuth2(User user);
+
+    public List<Permission> getUserPermissions(long userId);
 }

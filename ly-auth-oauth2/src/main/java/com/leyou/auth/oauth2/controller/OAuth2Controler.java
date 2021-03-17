@@ -33,7 +33,7 @@ public class OAuth2Controler {
     private UserClient userClient;
 
     @GetMapping(value = "login" )
-    public ResponseEntity<Void> login(@RequestParam String username ,
+    public ResponseEntity<AuthToken> login(@RequestParam String username ,
                                       @RequestParam String password ,
                                       HttpServletRequest httpServletRequest,
                                       HttpServletResponse httpServletResponse) {
@@ -43,9 +43,9 @@ public class OAuth2Controler {
         String cookieName = jwtConfiguration.getCookieName();
 
         //put token into cookie
-        CookieUtils.setCookie( httpServletRequest , httpServletResponse , cookieName , token.getAccessToken() , "" );
+        //CookieUtils.setCookie( httpServletRequest , httpServletResponse , cookieName , token.getAccessToken() , "" );
 
-        return ResponseEntity.status(HttpStatus.OK).build();
+        return ResponseEntity.ok(token);//.status(HttpStatus.OK).build();
     }
 
     @GetMapping(value = "testUserFromOauth2" )

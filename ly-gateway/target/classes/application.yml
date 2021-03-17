@@ -192,7 +192,7 @@ leyou:
       - /api/user/code
       - /api/user/query
       - /api/user/registerForOAuth2
-      - /api/item-service
+#      - /api/item-service
       - /api/page
       - /api/uaa/oauth2/login
 

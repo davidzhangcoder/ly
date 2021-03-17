@@ -41,7 +41,7 @@ spring:
       hibernate.format_sql: true
       hibernate.generate_statistics: false
   rabbitmq:
-    host: 192.168.1.10
+    host: 192.168.1.3
     username: leyou
     password: leyou
     virtual-host: /leyou
@@ -61,10 +61,10 @@ spring:
     publisher-confirms: true
     publisher-returns: true
   redis:
-    #host: 192.168.1.10 #这个是配单机版
+    #host: 192.168.1.3 #这个是配单机版
     enabled: true
     cluster:
-      nodes: 192.168.1.10:6379, 192.168.1.10:6380, 192.168.1.10:6381, 192.168.1.10:6389, 192.168.1.10:6390, 192.168.1.10:6391
+      nodes: 192.168.1.3:6379, 192.168.1.3:6380, 192.168.1.3:6381, 192.168.1.3:6389, 192.168.1.3:6390, 192.168.1.3:6391
       max-redirects: 5
     jedis:
       pool:
@@ -76,8 +76,8 @@ spring:
     enabled: true
     cluster: true
 
-    #nodes: 192.168.1.10:6379 #这个是配单机版
-    nodes: 192.168.1.10:6379, 192.168.1.10:6380, 192.168.1.10:6381, 192.168.1.10:6389, 192.168.1.10:6390, 192.168.1.10:6391 #这个是配集群版
+    #nodes: 192.168.1.3:6379 #这个是配单机版
+    nodes: 192.168.1.3:6379, 192.168.1.3:6380, 192.168.1.3:6381, 192.168.1.3:6389, 192.168.1.3:6390, 192.168.1.3:6391 #这个是配集群版
 
     #password: xxxx
 

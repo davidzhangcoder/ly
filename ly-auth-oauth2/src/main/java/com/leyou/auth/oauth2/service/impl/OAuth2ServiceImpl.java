@@ -102,6 +102,8 @@ public class OAuth2ServiceImpl implements OAuth2Service {
         authToken.setJti(jwtToken);
         authToken.setAccessToken(accessToken);
         authToken.setRefreshToken(refreshToken);
+
+        authToken.setUserId( user.getId() );
         return authToken;
     }
 

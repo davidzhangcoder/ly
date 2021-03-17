@@ -73,5 +73,10 @@ insert into role(id,name,description) values(2,'ROLE_USER','普通用户');
 insert into user_role_relation(id,user_id,role_id) values(1,39,1);
 
 insert into permission(id, name, description, url) values (1, 'home' , 'ROLE_HOME',  '/home' );
+insert into permission(id, name, description, url) values (2, 'GetBrands' , 'GetBrands',  '/item-service/brand/getBrands' );
+insert into permission(id, name, description, url) values (3, 'SaveBrand' , 'SaveBrand',  '/item-service/brand/persistBrand' );
+insert into permission(id, name, description, url) values (4, 'GetCategoriesByPage' , 'GetCategoriesByPage',  '/item-service/category/getCategoriesByPage' );
+insert into permission(id, name, description, url) values (5, 'SaveCategory' , 'SaveCategory',  '/item-service/category/persistCategory' );
+
 
 insert into role_permission_relation(id,role_id,permission_id) values(1,1,1);

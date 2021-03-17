@@ -9,6 +9,8 @@ import java.io.Serializable;
  *****/
 public class AuthToken implements Serializable{
 
+    long userId;
+
     //令牌信息
     String accessToken;
     //刷新token(refresh_token)
@@ -38,5 +40,13 @@ public class AuthToken implements Serializable{
 
     public void setJti(String jti) {
         this.jti = jti;
+    }
+
+    public long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(long userId) {
+        this.userId = userId;
     }
 }

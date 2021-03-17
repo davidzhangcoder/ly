@@ -6,26 +6,26 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="ly-sleuth" />
-        <module name="ly-cart" />
-        <module name="ly-auth-service" />
+        <module name="ly-upload" />
         <module name="ly-registry" />
+        <module name="ly-auth-service" />
         <module name="ly-common" />
         <module name="ly-user-service" />
         <module name="ly-auth-common" />
+        <module name="ly-onsale" />
         <module name="ly-order" />
+        <module name="ly-item-service" />
         <module name="ly-item-interface" />
         <module name="ly-user-interface" />
         <module name="ly-transactionbymessage" />
         <module name="ly-hystrixdashboard" />
-        <module name="ly-upload" />
-        <module name="ly-sms" />
+        <module name="ly-cart" />
         <module name="ly-search" />
         <module name="ly-gateway" />
         <module name="ly-page" />
         <module name="ly-auth-oauth2" />
-        <module name="ly-item-service" />
-        <module name="ly-onsale" />
+        <module name="ly-sleuth" />
+        <module name="ly-sms" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>

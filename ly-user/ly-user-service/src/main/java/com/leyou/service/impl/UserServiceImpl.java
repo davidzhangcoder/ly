@@ -5,7 +5,9 @@ import com.leyou.common.exception.LyException;
 import com.leyou.common.utils.Constants;
 import com.leyou.common.utils.NumberUtils;
 import com.leyou.configuration.RabbitMQSMSConfiguration;
+import com.leyou.dao.PermissionDao;
 import com.leyou.dao.UserDao;
+import com.leyou.domain.Permission;
 import com.leyou.domain.User;
 import com.leyou.service.UserService;
 import com.leyou.utils.CheckType;
@@ -35,6 +37,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserDao userDao;
+
+    @Autowired
+    private PermissionDao permissionDao;
 
     @Autowired
     private RabbitMQSMSConfiguration rabbitMQConfiguration;
@@ -210,5 +215,9 @@ public class UserServiceImpl implements UserService {
         user.setCreated(Calendar.getInstance().getTime());
         userDao.save(user);
 
+    }
+
+    public List<Permission> getUserPermissions(long userId){
+        return permissionDao.findByAdminUserId(userId);
     }
 }
