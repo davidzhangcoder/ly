@@ -6,7 +6,9 @@ import com.leyou.service.OnSaleService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
+import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -36,9 +38,35 @@ public class OnSaleController {
         long userID = 1;
 
         HttpSession session = request.getSession();
-        onSaleService.snapUpOrder(onSaleProductID, userID);
+        long uniqueID = onSaleService.snapUpOrder(onSaleProductID, userID);
 
-        return ResponseEntity.ok(1L);
+        return ResponseEntity.ok(uniqueID);
+    }
+
+    @GetMapping(value="snapUpOrderByUsingRedis")
+    public ResponseEntity<Long> snapUpOrderByUsingRedis(@RequestParam long onSaleProductID, @RequestParam long userID, HttpServletRequest request) {
+        //long userID = 2;
+
+        HttpSession session = request.getSession();
+        long uniqueID = onSaleService.snapUpOrderByUsingRedis(onSaleProductID, userID);
+
+        return ResponseEntity.ok(uniqueID);
+    }
+
+    @GetMapping(value="snapUpOrderByUsingRabbitmq")
+    public ResponseEntity<Long> snapUpOrderByUsingRabbitmq(@RequestParam long onSaleProductID, @RequestParam long userID , HttpServletRequest request){
+        //long userID = 3;
+
+        HttpSession session = request.getSession();
+        long uniqueID = onSaleService.snapUpOrderByUsingRabbitmq(onSaleProductID, userID);
+
+        return ResponseEntity.ok(uniqueID);
+    }
+
+    @GetMapping(value="queryOnSaleStatus")
+    public ResponseEntity<Integer> queryOnSaleStatus(@RequestParam long userID, @RequestParam long uniqueID){
+        int status = onSaleService.queryOnSaleStatus(userID , uniqueID);
+        return ResponseEntity.ok(status);
     }
 
     @GetMapping(value="testMethod")

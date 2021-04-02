@@ -1,18 +1,26 @@
 package com.leyou.service.impl;
 
+import com.leyou.common.cache.OrderDtoCache;
 import com.leyou.common.dto.OnSaleStatus;
 import com.leyou.common.utils.IdWorker;
 import com.leyou.common.utils.RedisKeyConstants;
+import com.leyou.configuration.WaitingListConfiguration;
 import com.leyou.service.OnSaleService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.redis.core.BoundSetOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Calendar;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Service(value="OnSaleServiceImpl")
 @Transactional
@@ -24,7 +32,15 @@ public class OnSaleServiceImpl implements OnSaleService {
     private OnSaleAsyncCreater onSaleAsyncCreater;
 
     @Autowired
+    @Qualifier("redisTemplateLeyou")
     private RedisTemplate redisTemplate;
+
+    @Autowired
+    @Qualifier( value = "leyouWaitingListRabbitTemplate" )
+    private AmqpTemplate amqpTemplate;
+
+    @Autowired
+    public WaitingListConfiguration waitingListConfiguration;
 
     @Override
     public long snapUpOrder(long onSaleProductID , long userID ) {
@@ -44,7 +60,45 @@ public class OnSaleServiceImpl implements OnSaleService {
     }
 
     @Override
-    public void queryOnSaleStatus(long uniqueID) {
+    public long snapUpOrderByUsingRedis(long onSaleProductID, long userID) {
 
+            IdWorker idWorker = new IdWorker();
+        long uniqueID = idWorker.nextId();
+        OnSaleStatus onSaleStatus = new OnSaleStatus( userID, Calendar.getInstance(), 1, onSaleProductID,"",uniqueID);
+
+        String hashTag = "_{OnSaleServiceImpl_snapUpOrder}";
+        String key = RedisKeyConstants.LIST_ONSALESTATUS_WAITINGLIST + hashTag;
+
+        redisTemplate.boundListOps(key).leftPush(onSaleStatus);
+
+        return uniqueID;
+    }
+
+    @Override
+    public long snapUpOrderByUsingRabbitmq(long onSaleProductID, long userID) {
+
+        IdWorker idWorker = new IdWorker();
+        long uniqueID = idWorker.nextId();
+        OnSaleStatus onSaleStatus = new OnSaleStatus( userID, Calendar.getInstance(), 1, onSaleProductID,"",uniqueID);
+
+        amqpTemplate.convertAndSend( waitingListConfiguration.getExchange() ,waitingListConfiguration.getRoutingKey() , onSaleStatus);
+
+        return uniqueID;
+    }
+
+    @Override
+    public int queryOnSaleStatus(long userID, long uniqueID) {
+        String hashTag = "_{OnSaleServiceImpl_snapUpOrder}";
+        String onSaleStatusKey = RedisKeyConstants.HASH_ONSALESTATUS + hashTag;
+        List<OnSaleStatus> onSaleStatusList = (List<OnSaleStatus>) redisTemplate.boundHashOps(onSaleStatusKey).get(String.valueOf(userID));
+        if( onSaleStatusList != null ) {
+            for (OnSaleStatus saleStatus : onSaleStatusList) {
+                if (saleStatus.getUniqueID() == uniqueID) {
+                    return saleStatus.getStatus();
+                }
+            }
+        }
+
+        return 0;
     }
 }

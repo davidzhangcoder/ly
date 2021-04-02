@@ -37,6 +37,7 @@ public class OnSaleAsyncCreater {
     private DefaultRedisScript onsaleLuaDefaultRedisScript;
 
     @Autowired
+    @Qualifier("redisTemplateLeyou")
     private RedisTemplate redisTemplate;
 
     @Autowired
@@ -51,14 +52,14 @@ public class OnSaleAsyncCreater {
         logger.warn("Processing onSaleProductID={}, Thread Name = {}" ,
                 onSaleProductID, Thread.currentThread().getName());
         //todo
-        //1.帐号是否正常 － 在Service中处理
+        //1.帐号是否正常 － 在Service中处理 - JWT token在Zuulfilter中处理，到这里已是正常的(20210330)
         //2.24小时之内是否购买过该商品 - 见下
-        //2-1.同一用户不能购买多次 － lua
+        //2-1.(Done)同一用户不能购买多次 － lua
         //3.(Done)是否存在未支付秒杀订单 - 见下
-        //4.该秒杀商品是否还有库存 － lua
+        //4.(Done)该秒杀商品是否还有库存 － lua
         //5.该秒杀商品抢购人数是否达到上限
         //6.恶意抢单
-        //7.抢单 - lua
+        //7.(Done)抢单 - lua
 
         //todo
         //1.Redis中的和workfow有关Key的过期时间是否应和Tomcat中的Session过期时间相同
@@ -79,6 +80,11 @@ public class OnSaleAsyncCreater {
 
         //2.24小时之内是否购买过该商品
         //未实现，和2-1冲突
+        // 现在的实现是：1. 同一用户不能购买多次,
+        //      （1）如之前"秒杀订单"已支付，"RedisKeyConstants.SET_USER_FOR_PRODUCT_PURCHASED"会挡住购买
+        //      （2）尽管"RedisKeyConstants.SET_ORDER_FOR_USER + userI"，
+        //          和"RedisKeyConstants.SET_USER_FOR_PRODUCT_PURCHASED"设置24小时过期（可以根据具体秒杀周期设置），但秒杀周期很短，应该一般最多也就一天
+        //
         //Hash_Product_for_User_purchased:{user_id} ->
         //key:product_id, value:上次购买时间
 
@@ -87,7 +93,9 @@ public class OnSaleAsyncCreater {
         OnSaleStatus onSaleStatus = (OnSaleStatus)redisTemplate.boundHashOps(onSaleStatusKey).get(String.valueOf(userID));
 
         //3.是否存在未支付秒杀订单
-        BoundSetOperations setOrderForUser = redisTemplate.boundSetOps(RedisKeyConstants.SET_ORDER_FOR_USER);
+        //String setOrderForUserKey = RedisKeyConstants.SET_ORDER_FOR_USER + userID; //其实不加userID也可实现
+        String setOrderForUserKey = RedisKeyConstants.SET_ORDER_FOR_USER;
+        BoundSetOperations setOrderForUser = redisTemplate.boundSetOps(setOrderForUserKey);
         if (!setOrderForUser.members().isEmpty()) {
             for (String orderUniqueIDKey : (Set<String>)setOrderForUser.members()) {
                 if (redisTemplate.hasKey(orderUniqueIDKey)) {
@@ -150,7 +158,11 @@ public class OnSaleAsyncCreater {
 
                 String orderDtoCacheKey = RedisKeyConstants.VALUE_OBJECT_ORDERCACHEDTO_ON_ORDERUNIQUEID + onSaleStatus.getUniqueID();
                 redisTemplate.boundValueOps(orderDtoCacheKey).set(orderDtoCache,1, TimeUnit.DAYS);
-                redisTemplate.boundSetOps(RedisKeyConstants.SET_ORDER_FOR_USER).add(orderDtoCacheKey);
+                redisTemplate.boundSetOps(setOrderForUserKey).add(orderDtoCacheKey);
+
+                //更新status为"秒杀等待支付"
+                onSaleStatus.setStatus(2);
+                redisTemplate.boundHashOps(onSaleStatusKey).put(String.valueOf(userID), onSaleStatus);
 
                 //todo - Done
                 //传入onSaleProductID和userID
@@ -194,6 +206,9 @@ public class OnSaleAsyncCreater {
                 redisTemplate.boundHashOps(onSaleStatusKey).put(String.valueOf(userID), onSaleStatus);
             }
         }
+
+        redisTemplate.exec();
+        RedisConnectionUtils.unbindConnection(redisTemplate.getConnectionFactory());
 
         return;
 //        return new AsyncResult<String>("hello world !!!!");

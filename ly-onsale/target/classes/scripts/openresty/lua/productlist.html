@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>hello</title>
+    <style type="text/css">
+        .product-item{
+            border: 1px solid blue;
+            margin: 50px 50px;
+            padding: 10px 10px;
+        }
+    </style>
+</head>
+<body>
+<!--productListData, {* productListData *}-->
+
+商品：
+{% local i = 1; %}
+{% for i = 1, table.getn(productListData) do %}
+    {% local temp = productListData[i]; %}
+<!--    {* temp.id *}-->
+<!--    {* temp.spuId *}-->
+<!--    {* temp.title *}-->
+<!--    {* temp.images *}-->
+<!--    {* temp.price *}-->
+<!--    {* temp.enable *}-->
+<!--    {* temp.stock *}-->
+
+        <div class="product-item">
+            <strong><a href=''>{* temp.title *}</a></strong>
+            <p>{* temp.price *}</p>
+        </div>
+{% end %}<br/>
+
+
+
+<script type="text/javascript">
+    // console.log("{* productListData *}");
+
+    // ;(function () {
+    //     var productListData = JSON.parse('{* productListData *}')
+    //
+    //     console.log(productListData);
+    // })()
+
+</script>
+</body>
+</html>
+

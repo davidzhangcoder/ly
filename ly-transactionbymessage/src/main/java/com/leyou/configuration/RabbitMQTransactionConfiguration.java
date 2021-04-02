@@ -8,6 +8,7 @@ import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -31,6 +32,7 @@ public class RabbitMQTransactionConfiguration {
         return new DirectExchange(transactionQueueConfiguration.getExchange());
     }
 
+    //第一种方法
     @Bean
     Queue leyouTransactionQueue(){
         // 注册队列
@@ -42,6 +44,34 @@ public class RabbitMQTransactionConfiguration {
         // 将队列以 info-msg 为绑定键绑定到交换机
         return BindingBuilder.bind(leyouTransactionQueue).to(directExchange).with(transactionQueueConfiguration.getRoutingKey());
     }
+
+    //第二种方法
+//    @Bean(name = "leyouTransactionQueue1")
+//    Queue leyouTransactionQueue(){
+//        // 注册队列
+//        return new Queue(transactionQueueConfiguration.getQueue());
+//    }
+//
+//    @Bean
+//    Binding leyouTransactionQueueToExchangeBinging(Queue leyouTransactionQueue1, DirectExchange directExchange) {
+//        // 将队列以 info-msg 为绑定键绑定到交换机
+//        return BindingBuilder.bind(leyouTransactionQueue1).to(directExchange).with(transactionQueueConfiguration.getRoutingKey());
+//    }
+
+    //第三种方法
+//    @Bean(name="leyouTransactionQueueName")
+//    Queue leyouTransactionQueue(){
+//        // 注册队列
+//        return new Queue(transactionQueueConfiguration.getQueue());
+//    }
+//
+//    @Bean
+//    Binding leyouTransactionQueueToExchangeBinging(@Qualifier("leyouTransactionQueueName") Queue leyouTransactionQueue1, DirectExchange directExchange) {
+//        // 将队列以 info-msg 为绑定键绑定到交换机
+//        return BindingBuilder.bind(leyouTransactionQueue1).to(directExchange).with(transactionQueueConfiguration.getRoutingKey());
+//    }
+
+
 
 
 

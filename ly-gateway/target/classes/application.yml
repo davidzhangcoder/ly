@@ -19,10 +19,10 @@ spring:
 #  redis:
 #    enabled: false
   redis:
-    #host: 192.168.1.3 #这个是配单机版
+    #host: 192.168.1.2 #这个是配单机版
     enabled: true
     cluster:
-      nodes: 192.168.1.3:6379, 192.168.1.3:6380, 192.168.1.3:6381, 192.168.1.3:6389, 192.168.1.3:6390, 192.168.1.3:6391
+      nodes: 192.168.1.2:6379, 192.168.1.2:6380, 192.168.1.2:6381, 192.168.1.2:6389, 192.168.1.2:6390, 192.168.1.2:6391
       max-redirects: 5
     jedis:
       pool:
@@ -192,7 +192,7 @@ leyou:
       - /api/user/code
       - /api/user/query
       - /api/user/registerForOAuth2
-#      - /api/item-service
+      - /api/item-service
       - /api/page
       - /api/uaa/oauth2/login
 

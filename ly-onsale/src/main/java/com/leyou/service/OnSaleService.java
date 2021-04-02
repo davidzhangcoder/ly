@@ -4,5 +4,9 @@ public interface OnSaleService {
 
     public long snapUpOrder(long onSaleProductID, long userID);
 
-    public void queryOnSaleStatus(long uniqueID);
+    public long snapUpOrderByUsingRedis(long onSaleProductID, long userID);
+
+    public long snapUpOrderByUsingRabbitmq(long onSaleProductID, long userID);
+
+    public int queryOnSaleStatus(long userID, long uniqueID);
 }

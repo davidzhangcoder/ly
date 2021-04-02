@@ -15,7 +15,9 @@ public class RedisKeyConstants {
 
     public static final String TEMP_CART_ID = "TEMP_CART_ID:";
 
-    //(expire:24hours)
+
+    //version1
+    //(expire:24hours) - 可以实现24小时之内不能多次购买，（可以根据具体秒杀周期设置）
     public static final String SET_ORDER_FOR_USER = "SET_ORDER_FOR_USER:";
 
     //(expire:24hours)
@@ -26,4 +28,12 @@ public class RedisKeyConstants {
 
     //(expire:24hours)
     public static final String HASH_ONSALESTATUS_BY_PRODUCT_ON_USERID = "HASH_ONSALESTATUS_BY_PRODUCT_ON_USERID:";
+
+
+
+    public static final String LIST_ONSALESTATUS_WAITINGLIST = "LIST_ONSALESTATUS_WAITINGLIST";
+
+
+    //version2
+    public static final String HASH_ONSALESTATUS = "HASH_ONSALESTATUS:";
 }
