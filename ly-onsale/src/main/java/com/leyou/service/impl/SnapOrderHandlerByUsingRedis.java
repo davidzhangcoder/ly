@@ -10,9 +10,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import javax.swing.plaf.TableHeaderUI;
 import java.util.concurrent.Executor;
-import java.util.concurrent.locks.LockSupport;
 
 @Component
 public class SnapOrderHandlerByUsingRedis {
@@ -26,7 +24,7 @@ public class SnapOrderHandlerByUsingRedis {
     private RedisTemplate redisTemplate;
 
     @Autowired
-    private OnSaleAsyncCreaterByUsingRedis onSaleAsyncCreater;
+    private OnSaleAsyncCreaterByUsingRedisAndRabbitMQ onSaleAsyncCreater;
 
     @PostConstruct
     @Async

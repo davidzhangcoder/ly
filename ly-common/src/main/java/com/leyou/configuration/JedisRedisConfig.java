@@ -21,10 +21,15 @@ public class JedisRedisConfig {
     @Bean
     public JedisPoolConfig jedisPool(JedisProperties jedisProperties) {
         JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
-        jedisPoolConfig.setMaxIdle(jedisProperties.getMaxIdle());
-        jedisPoolConfig.setMaxWaitMillis(jedisProperties.getMaxWait());
+
+
         jedisPoolConfig.setMaxTotal(jedisProperties.getMaxActive());
+        jedisPoolConfig.setMaxIdle(jedisProperties.getMaxIdle());
         jedisPoolConfig.setMinIdle(jedisProperties.getMinIdle());
+        jedisPoolConfig.setMaxWaitMillis(jedisProperties.getMaxWait());
+        jedisPoolConfig.setBlockWhenExhausted(true);
+        jedisPoolConfig.setTestOnBorrow(true);
+
         return jedisPoolConfig;
     }
 

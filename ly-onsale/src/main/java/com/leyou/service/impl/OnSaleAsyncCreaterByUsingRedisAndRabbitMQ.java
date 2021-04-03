@@ -1,6 +1,5 @@
 package com.leyou.service.impl;
 
-import com.leyou.common.cache.OrderDtoCache;
 import com.leyou.common.dto.OnSaleStatus;
 import com.leyou.common.enums.ExceptionEnum;
 import com.leyou.common.exception.LyException;
@@ -16,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.connection.RedisConnection;
-import org.springframework.data.redis.core.BoundSetOperations;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisConnectionUtils;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -28,7 +26,6 @@ import redis.clients.jedis.JedisCluster;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 //更新stock的key的样式
@@ -52,11 +49,29 @@ import java.util.stream.Collectors;
 //未支付，过期后，有其他"未支付秒杀订单"，再购买相同商品，－ 在此代码中栏住，即设置reason为"存在未支付秒杀订单"
 //未支付，还没过期，再购买相同商品，－ 在此代码中栏住，即设置reason为"存在未支付秒杀订单"
 
+//RabbitMQ需要测试:
+//Done - publishConfirm
+//Done - returnConfirm - 即：MQ接收失败或者路由失败，1.消息找不到对应的Exchange， 2.找到了Exchange但是找不到对应的Queue
+//消费者ACK
+//Done - 消费者异常，message还在队列中（手动ACK）,最好再测下自动ACK
+//  测试结果: (1)手动ACK：在WaitingListListener中消费后，没有ACK（RabbitMQ中状态是Unack）,停掉ly-onsale, RabbitMQ中状态变为Ready,重启ly-onsale后，会再一次消费
+//          (2)自动ACK: 如代码中有错误(如int i = 1/0); 还是不会自动ACK, 个人认为，抛出异常后，会引起之后的"自动ACK"代码没有执行
+//发送重试
+//消费有没有重试
+//如何开启多个listener来处理
+
+//关于手动消息确认:
+//        https://blog.csdn.net/g3230863/article/details/84777509
+//        RabbitMQ 默认使用的是自动的确认模式，在投递成功之前，如果消费者的 TCP 连接 或者 channel 关闭了，这条消息就会丢失
+//        https://segmentfault.com/a/1190000023736395
+//        打开手动消息确认之后，只要我们这条消息没有成功消费，无论中间是出现消费者宕机还是代码异常，只要连接断开之后这条信息还没有被消费那么这条消息就会被重新放入队列再次被消费
+
+
 
 @Component
-public class OnSaleAsyncCreaterByUsingRedis {
+public class OnSaleAsyncCreaterByUsingRedisAndRabbitMQ {
 
-    private Logger logger = LoggerFactory.getLogger(OnSaleAsyncCreater.class);
+    private Logger logger = LoggerFactory.getLogger(OnSaleAsyncCreaterByUsingRedisAndRabbitMQ.class);
 
     @Autowired
     @Qualifier(value="onsale")
@@ -146,8 +161,9 @@ public class OnSaleAsyncCreaterByUsingRedis {
         List<OnSaleStatus> onSaleStatusList = (List<OnSaleStatus>) redisTemplate.boundHashOps(onSaleStatusKey).get(String.valueOf(userID));
         if( onSaleStatusList != null ) {
             for (OnSaleStatus saleStatus : onSaleStatusList) {
-                if (saleStatus.getUniqueID() != onSaleStatus.getUniqueID() && onSaleStatus.getStatus() == 2) {
+                if (saleStatus.getUniqueID() != onSaleStatus.getUniqueID() && saleStatus.getStatus() == 2) {
                     //返回 不能购买秒杀商品 － reason: 存在未支付秒杀订单
+                    System.out.println("存在未支付秒杀订单");
                     onSaleStatus.setStatus(4);
                     onSaleStatus.setReason("存在未支付秒杀订单");
                     //下面这行filter可以不要

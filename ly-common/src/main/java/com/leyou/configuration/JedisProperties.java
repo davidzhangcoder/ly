@@ -25,7 +25,7 @@ public class JedisProperties {
     @Value("${spring.redis.jedis.pool.max-idle}")
     private Integer maxIdle;
 
-    @Value("${spring.redis.jedis.pool.min-idle}")
+    @Value("${spring.redis.jedis.pool.max-wait}")
     private Integer maxWait;
 
     public Integer getMaxActive() {

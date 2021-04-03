@@ -9,6 +9,8 @@ import com.leyou.service.OnSaleService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.AmqpTemplate;
+import org.springframework.amqp.rabbit.connection.CorrelationData;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.BoundSetOperations;
@@ -16,9 +18,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Calendar;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -37,7 +37,7 @@ public class OnSaleServiceImpl implements OnSaleService {
 
     @Autowired
     @Qualifier( value = "leyouWaitingListRabbitTemplate" )
-    private AmqpTemplate amqpTemplate;
+    private RabbitTemplate amqpTemplate;
 
     @Autowired
     public WaitingListConfiguration waitingListConfiguration;
@@ -81,7 +81,14 @@ public class OnSaleServiceImpl implements OnSaleService {
         long uniqueID = idWorker.nextId();
         OnSaleStatus onSaleStatus = new OnSaleStatus( userID, Calendar.getInstance(), 1, onSaleProductID,"",uniqueID);
 
-        amqpTemplate.convertAndSend( waitingListConfiguration.getExchange() ,waitingListConfiguration.getRoutingKey() , onSaleStatus);
+        CorrelationData correlationData = new CorrelationData( uniqueID + "" );
+
+        amqpTemplate.convertAndSend( waitingListConfiguration.getExchange() ,waitingListConfiguration.getRoutingKey() , onSaleStatus, correlationData);
+
+//        amqpTemplate.convertAndSend( waitingListConfiguration.getExchange() ,waitingListConfiguration.getRoutingKey() , onSaleStatus);
+
+        //测试代码
+        //amqpTemplate.convertAndSend( waitingListConfiguration.getExchange() ,"notexistingrouteringkey" , onSaleStatus, correlationData);
 
         return uniqueID;
     }

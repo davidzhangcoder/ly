@@ -48,7 +48,7 @@ public class NotPaidListener {
         System.out.println("发送时间:"+sentTime);
         System.out.println("收到信息:"+msg);
 
-        //更新状态
+        //更新状态OnSaleAsyncCreater
         //String hashTag = "_{OnSaleServiceImpl_snapUpOrder}";
         String onSaleStatusKey = RedisKeyConstants.HASH_ONSALESTATUS + hashTag;
         List<OnSaleStatus> onSaleStatusList = (List<OnSaleStatus>) redisTemplate.boundHashOps(onSaleStatusKey).get(String.valueOf(userID));
