@@ -4,6 +4,7 @@ import com.leyou.common.dto.OnSaleStatus;
 import com.leyou.common.utils.RedisKeyConstants;
 import com.leyou.configuration.RabbitMQConfiguration;
 
+import com.rabbitmq.client.Channel;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -14,6 +15,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -33,7 +35,7 @@ public class NotPaidListener {
      */
     @RabbitListener(queues = RabbitMQConfiguration.QUEUE_NOT_PAID)
     @RabbitHandler
-    public void msg(@Payload Message msg){
+    public void msg(@Payload Message msg, Channel channel) throws IOException {
         Map<String,String> messageMap = (Map<String, String>) SerializationUtils.deserialize(msg.getBody());
         String onSaleProductID = messageMap.get("onSaleProductID");
         String userID = messageMap.get("userID");
@@ -74,6 +76,8 @@ public class NotPaidListener {
         //back stock
         String productStockKey = RedisKeyConstants.GOODS_STOCK + onSaleProductID + hashTag;
         redisTemplate.boundValueOps(productStockKey).increment();
+
+        channel.basicAck(msg.getMessageProperties().getDeliveryTag(), false);
     }
 
 }

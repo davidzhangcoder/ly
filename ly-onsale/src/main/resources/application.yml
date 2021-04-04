@@ -47,17 +47,22 @@ spring:
     listener:
       simple:
         acknowledge-mode: manual
-#        prefetch: 1
-#        retry:
-#          enabled: true
-#          max-attempts: 3
+        concurrency: 1 #最小消费者数量
+        maxConcurrency: 1 #最大的消费者数量
+        prefetch: 1
+        retry:
+          enabled: true
+          max-attempts: 3
+          initial-interval: 1000
+          multiplier: 1.0
     template:
       mandatory: true #是否启用强制信息；默认false ＃要触发returnedMessage回调函数，我们必须设置mandatory=true
-#      retry:
-#        enabled: true
-#        initial-interval: 10000ms
-#        max-interval: 30000ms
-#        multiplier: 2
+      retry:
+        enabled: true
+        initial-interval: 1000
+        max-interval: 3000
+        max-attempts: 3
+        multiplier: 1.0
 #      exchange: leyou.item.exchange
     publisher-confirms: true
     publisher-returns: true

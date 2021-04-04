@@ -26,6 +26,7 @@ import redis.clients.jedis.JedisCluster;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 //更新stock的key的样式
@@ -60,11 +61,20 @@ import java.util.stream.Collectors;
 //消费有没有重试
 //如何开启多个listener来处理
 
+
 //关于手动消息确认:
 //        https://blog.csdn.net/g3230863/article/details/84777509
 //        RabbitMQ 默认使用的是自动的确认模式，在投递成功之前，如果消费者的 TCP 连接 或者 channel 关闭了，这条消息就会丢失
 //        https://segmentfault.com/a/1190000023736395
 //        打开手动消息确认之后，只要我们这条消息没有成功消费，无论中间是出现消费者宕机还是代码异常，只要连接断开之后这条信息还没有被消费那么这条消息就会被重新放入队列再次被消费
+//https://blog.csdn.net/qq_38846242/article/details/84958640?spm=1001.2014.3001.5501
+//手动确认情况下，推荐在消息消费失败时，将消息放入死信队列（requeue=false）- 需要配死信队列
+
+//关于prefetch:
+//RabbitMQ 将消息顺序发送给多个消费者有两种模式（公平分发、轮询模式），
+//        区别在于公平分发的prefetch默认是1，如果设置为0就是轮询模式。
+//        1、公平分发：消费者1和消费者2获取到的消息内容是不同的，同一个消息只能被一个消费者获取。
+//        2、轮询模式： 消费者1和消费者2获取到的消息的数量是相同的，一个是消费奇数号消息，一个是偶数
 
 
 
@@ -88,7 +98,7 @@ public class OnSaleAsyncCreaterByUsingRedisAndRabbitMQ {
     @Autowired
     private RabbitMQConfiguration rabbitMQConfiguration;
 
-    @Async(value="onSaleThreadPool_OnSaleService")
+//    @Async(value="onSaleThreadPool_OnSaleService")
     public void snapUpOrder(OnSaleStatus onSaleStatus){
         logger.warn("Processing onSaleProductID={}, Thread Name = {}" ,
                 onSaleStatus.getGoodsId(), Thread.currentThread().getName());
@@ -166,7 +176,6 @@ public class OnSaleAsyncCreaterByUsingRedisAndRabbitMQ {
                     System.out.println("存在未支付秒杀订单");
                     onSaleStatus.setStatus(4);
                     onSaleStatus.setReason("存在未支付秒杀订单");
-                    //下面这行filter可以不要
                     List<OnSaleStatus> onSaleStatusListTemp = onSaleStatusList.stream().filter(a -> a.getUniqueID() != onSaleStatus.getUniqueID()).collect(Collectors.toList());
                     onSaleStatusListTemp.add(onSaleStatus);
                     redisTemplate.boundHashOps(onSaleStatusKey).put(String.valueOf(userID), onSaleStatusListTemp);
@@ -205,14 +214,15 @@ public class OnSaleAsyncCreaterByUsingRedisAndRabbitMQ {
 
         if (result != null) {
             if (result == 1) {
-                System.out.println("success");
+                System.out.println("success: " + onSaleStatus.getUniqueID());
                 //更新status为"秒杀等待支付"
                 onSaleStatus.setStatus(2);
 
                 if( onSaleStatusList == null )
                     onSaleStatusList = new ArrayList<OnSaleStatus>();
-                onSaleStatusList.add( onSaleStatus );
-                redisTemplate.boundHashOps(onSaleStatusKey).put(String.valueOf(userID), onSaleStatusList);
+                List<OnSaleStatus> onSaleStatusListTemp = onSaleStatusList.stream().filter(a -> a.getUniqueID() != onSaleStatus.getUniqueID()).collect(Collectors.toList());
+                onSaleStatusListTemp.add( onSaleStatus );
+                redisTemplate.boundHashOps(onSaleStatusKey).put(String.valueOf(userID), onSaleStatusListTemp);
 
 //                //todo - Done
 //                //create OrderDTOCache in Redis
@@ -265,8 +275,9 @@ public class OnSaleAsyncCreaterByUsingRedisAndRabbitMQ {
                 onSaleStatus.setReason("only one purchased allowed");
                 if( onSaleStatusList == null )
                     onSaleStatusList = new ArrayList<OnSaleStatus>();
-                onSaleStatusList.add( onSaleStatus );
-                redisTemplate.boundHashOps(onSaleStatusKey).put(String.valueOf(userID), onSaleStatusList);
+                List<OnSaleStatus> onSaleStatusListTemp = onSaleStatusList.stream().filter(a -> a.getUniqueID() != onSaleStatus.getUniqueID()).collect(Collectors.toList());
+                onSaleStatusListTemp.add( onSaleStatus );
+                redisTemplate.boundHashOps(onSaleStatusKey).put(String.valueOf(userID), onSaleStatusListTemp);
             } else if (result == 3) {
                 System.out.println("stock is not configured");
                 onSaleStatus.setStatus(4);
@@ -278,13 +289,14 @@ public class OnSaleAsyncCreaterByUsingRedisAndRabbitMQ {
                 onSaleStatus.setReason("sold out");
                 if( onSaleStatusList == null )
                     onSaleStatusList = new ArrayList<OnSaleStatus>();
-                onSaleStatusList.add( onSaleStatus );
-                redisTemplate.boundHashOps(onSaleStatusKey).put(String.valueOf(userID), onSaleStatusList);
+                List<OnSaleStatus> onSaleStatusListTemp = onSaleStatusList.stream().filter(a -> a.getUniqueID() != onSaleStatus.getUniqueID()).collect(Collectors.toList());
+                onSaleStatusListTemp.add( onSaleStatus );
+                redisTemplate.boundHashOps(onSaleStatusKey).put(String.valueOf(userID), onSaleStatusListTemp);
             }
         }
 
         RedisConnectionUtils.unbindConnection(redisTemplate.getConnectionFactory());
-
+        
         return;
 //        return new AsyncResult<String>("hello world !!!!");
     }

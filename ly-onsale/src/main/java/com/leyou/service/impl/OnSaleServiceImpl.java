@@ -81,14 +81,21 @@ public class OnSaleServiceImpl implements OnSaleService {
         long uniqueID = idWorker.nextId();
         OnSaleStatus onSaleStatus = new OnSaleStatus( userID, Calendar.getInstance(), 1, onSaleProductID,"",uniqueID);
 
-        CorrelationData correlationData = new CorrelationData( uniqueID + "" );
+        String hashTag = "_{OnSaleServiceImpl_snapUpOrder}";
+        String onSaleStatusKey = RedisKeyConstants.HASH_ONSALESTATUS + hashTag;
+        List<OnSaleStatus> onSaleStatusList = (List<OnSaleStatus>) redisTemplate.boundHashOps(onSaleStatusKey).get(String.valueOf(userID));
+        if( onSaleStatusList == null )
+            onSaleStatusList = new ArrayList<OnSaleStatus>();
+        onSaleStatusList.add( onSaleStatus );
+        redisTemplate.boundHashOps(onSaleStatusKey).put(String.valueOf(userID), onSaleStatusList);
 
+        CorrelationData correlationData = new CorrelationData( uniqueID + "" );
         amqpTemplate.convertAndSend( waitingListConfiguration.getExchange() ,waitingListConfiguration.getRoutingKey() , onSaleStatus, correlationData);
 
 //        amqpTemplate.convertAndSend( waitingListConfiguration.getExchange() ,waitingListConfiguration.getRoutingKey() , onSaleStatus);
 
         //测试代码
-        //amqpTemplate.convertAndSend( waitingListConfiguration.getExchange() ,"notexistingrouteringkey" , onSaleStatus, correlationData);
+//        amqpTemplate.convertAndSend("notexistingexchange" ,"notexistingrouteringkey" , onSaleStatus, correlationData);
 
         return uniqueID;
     }
@@ -109,3 +116,16 @@ public class OnSaleServiceImpl implements OnSaleService {
         return 0;
     }
 }
+
+//long uniqueID = idWorker.nextId();的算法有问题，会得到相同的ID
+//        2021-04-04 16:19:18.255  WARN [onsale-service,7698a45d2a3b366a,a828323ddb6e79a3,true] 853 --- [cTaskExecutor-1] nSaleAsyncCreaterByUsingRedisAndRabbitMQ : Processing onSaleProductID=10781492357, Thread Name = SimpleAsyncTaskExecutor-1
+//        success: 1378804389968343041
+//        消费者: ACK , Channel Number: 2 , 1378804389968343041
+//        2021-04-04 16:19:18.289  WARN [onsale-service,29f3168ff87a9fa8,a38163bc57caa190,true] 853 --- [cTaskExecutor-1] nSaleAsyncCreaterByUsingRedisAndRabbitMQ : Processing onSaleProductID=10781492357, Thread Name = SimpleAsyncTaskExecutor-1
+//        success: 1378804389968343041
+//        消费者: ACK , Channel Number: 2 , 1378804389968343041
+//        WaitingListConfirmCallBack - 到达exchange - ack:成功 correlationData:id(OnSaleStatus's uniqueID)=1378804390400356352
+//        2021-04-04 16:19:18.332  WARN [onsale-service,573d424c90b96398,d2245e7cd61d6a9d,true] 853 --- [cTaskExecutor-1] nSaleAsyncCreaterByUsingRedisAndRabbitMQ : Processing onSaleProductID=10781492357, Thread Name = SimpleAsyncTaskExecutor-1
+//        success: 1378804389968343041
+//        消费者: ACK , Channel Number: 2 , 1378804389968343041
+

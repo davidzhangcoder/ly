@@ -12,6 +12,7 @@
         <module name="ly-common" />
         <module name="ly-user-service" />
         <module name="ly-auth-common" />
+        <module name="ly-onsale" />
         <module name="ly-order" />
         <module name="ly-item-service" />
         <module name="ly-item-interface" />
@@ -19,13 +20,12 @@
         <module name="ly-transactionbymessage" />
         <module name="ly-hystrixdashboard" />
         <module name="ly-cart" />
-        <module name="ly-sms" />
         <module name="ly-search" />
         <module name="ly-gateway" />
         <module name="ly-page" />
         <module name="ly-auth-oauth2" />
         <module name="ly-sleuth" />
-        <module name="ly-onsale" />
+        <module name="ly-sms" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
